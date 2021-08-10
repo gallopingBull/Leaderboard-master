@@ -1,2 +1,2 @@
 # Leaderboard_Project
-leaderboard template for local and online use
+local and online leaderboard template for unity
