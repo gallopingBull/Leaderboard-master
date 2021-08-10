@@ -22,7 +22,9 @@ public class SaveSystem : MonoBehaviour
             LoadData();
         }
     }
-
+    /// <summary>
+    /// 
+    /// </summary>
     private void LoadData()
     {
 
