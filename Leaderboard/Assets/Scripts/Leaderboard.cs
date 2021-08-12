@@ -4,12 +4,14 @@ using System.Linq;
 using System.Collections.Generic;
 using TMPro;	
 using UnityEngine;
-
+[Serializable]
 public class Leaderboard : MonoBehaviour
 {
-	
+	[SerializeField]
 	private static Leaderboard instance;
+	[SerializeField]
 	public Dictionary<string, int> localLeaderboards = new Dictionary<string, int>();
+	[SerializeField]
 	private Dictionary<string, int> onlineLeaderboard = new Dictionary<string, int>();
 
 	private string name = "";
@@ -91,6 +93,26 @@ public class Leaderboard : MonoBehaviour
 			}
 		}
 		print("init over");
+	}
+	public void SetLocalLeaderboard(List<string> keys, List<int> values)
+	{
+		/*
+        foreach (var item in local_leaderboard)
+        {
+			localLeaderboards.Add(item.Key, item.Value);
+        }*/
+
+        for (int i = 0; i < keys.Count; i++)
+        {
+			localLeaderboards.Add(keys[i], values[i]);
+		}
+		
+		
+		//localLeaderboards = local_leaderboard;
+	}
+	public List<KeyValuePair<string, int>> GetLocalLeaderboard()
+	{
+		return localLeaderboards.ToList();
 	}
 
 
