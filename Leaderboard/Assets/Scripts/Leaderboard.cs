@@ -9,13 +9,20 @@ public class Leaderboard : MonoBehaviour
 {
 	[SerializeField]
 	private static Leaderboard instance;
+
+	private enum LeaderboardStates
+    {
+		init, local, online
+    }
+
 	[SerializeField]
-	public Dictionary<string, int> localLeaderboards = new Dictionary<string, int>();
+	private Dictionary<string, int> leaderboard = new Dictionary<string, int>();
+	[SerializeField]
+	public Dictionary<string, int> localLeaderboard = new Dictionary<string, int>();
 	[SerializeField]
 	private Dictionary<string, int> onlineLeaderboard = new Dictionary<string, int>();
 
-	private string name = "";
-
+	private bool init = false; 
 
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
@@ -46,100 +53,92 @@ public class Leaderboard : MonoBehaviour
 		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
 		playerScoreField = GameObject.Find("InputField_PlayerScore");
 
-		//localLeaderboards.Add("fucj", 211);
-		//localLeaderboards.Add("ass", 18);
-		//localLeaderboards.Add("bdsfds", 50);
-		//localLeaderboards.Add("cdcda", 78);
-		//localLeaderboards.Add("zsdfs", 45);
+		// if no leaderboard has been created
+		// creeate new leaderboard with blank values
+		if (!init)
+			CreateLeaderboard();
+
+		//set data in leaderboard fields
 		InitLocalLeadboard();
 	}
 
 
 	private void InitLocalLeadboard()
 	{
-		//read in player score database
-		//(sort if you have too)
-		//declare and initialize new list of player sc ore
-
-		//copy player score data into list
-
-
-		GameObject tmpEntry;
-		for (int i = 0; i < LeaderboardListSizeMAX; i++)
-        {
-			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
-			transform);
-			playerScore_entries_UI.Add(tmpEntry); //is this necessary?
-		}
-
-
-		if (localLeaderboards.Count > 0)
+		// copy player score data into list
+		if (localLeaderboard.Count > 0)
 		{
 			// tmp list to sort elements in dictionary by value (aka: scpre)
-			List<KeyValuePair<string, int>> tmplist = localLeaderboards.ToList();
+			List<KeyValuePair<string, int>> reorderedList =
+				ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 
-			//sort by highest to lowest
-			var val = from element in localLeaderboards
-					  orderby element.Value descending
-					  select element;
 
 			int i = 0;
-			foreach (KeyValuePair<string, int> pair in val)
+			foreach (KeyValuePair<string, int> pair in reorderedList)
             {
-				if (i == localLeaderboards.Count)
+				if (i == reorderedList.Count)
 					return;
-				playerScore_entries_UI[i].GetComponent<PlayerRankData>().SetTextFields(pair.Key, pair.Value, i + 1);
+				SetRankDataToTextField(pair.Key, pair.Value, i, playerScore_entries_UI[i]); // do not like the way im sending
+																							// the object reference here
 				i++;
 			}
 		}
-		print("init over");
+		
+		//init = true;
 	}
-	public void SetLocalLeaderboard(List<string> keys, List<int> values)
-	{
-		/*
-        foreach (var item in local_leaderboard)
-        {
-			localLeaderboards.Add(item.Key, item.Value);
-        }*/
-
-        for (int i = 0; i < keys.Count; i++)
-        {
-			localLeaderboards.Add(keys[i], values[i]);
+	
+	// creeate new blank leaderboard with default rank data
+	private void CreateLeaderboard()
+    {
+		GameObject tmpEntry;
+		for (int i = 0; i < LeaderboardListSizeMAX; i++)
+		{
+			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
+			transform);
+			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
 		}
-		
-		
-		//localLeaderboards = local_leaderboard;
+	}
+
+	public void SetLeaderboardData(List<string> keys, List<int> values)
+	{
+
+		GameObject tmpEntry;
+		for (int i = 0; i < keys.Count; i++)
+		{
+			localLeaderboard.Add(keys[i], values[i]);
+			tmpEntry = playerScore_entries_UI[i];
+			SetRankDataToTextField(keys[i], values[i], i, tmpEntry);
+			playerScore_entries_UI.Add(tmpEntry); 
+
+
+		}
 	}
 	public List<KeyValuePair<string, int>> GetLocalLeaderboard()
 	{
-		return localLeaderboards.ToList();
+		return localLeaderboard.ToList();
 	}
 
-
-	private void SetText()
+	private void SetRankDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
 	{
-
+		rank_UI_Panel.GetComponent<PlayerRankData>().SetTextFields(key, value, index + 1);
 	}
 
 	// create leaderboard rank UI panels and assign correct
 	// data to TMP text fields
 	private void InitOnlineLeadboard()
 	{
-
-
 	}
 
-
-	public void AddToLeaderboard()
+	public void Add_RankData_To_Leaderboard()
 	{
-		//destroy panels if new score is added to leaderboard
+		//destroy previous yu player rank panels if new score is added to leaderboard
         if (playerScore_entries_UI.Count > 0)
         {
             foreach (GameObject item in playerScore_entries_UI)
 				Destroy(item.gameObject);
 		}
-
-		string _name = "";
+        #region input field stuff
+        string _name = "";
 		string _score = "";
 		
 		int score = 0;
@@ -154,33 +153,42 @@ public class Leaderboard : MonoBehaviour
 			score == 0)
 			return;
 
-		
-		localLeaderboards.Add(_name, score);
+
+        #endregion
+
+        localLeaderboard.Add(_name, score);
 
 		// tmp list to sort elements in dictionary by value (aka: scpre)
-		List<KeyValuePair<string, int>> tmplist = localLeaderboards.ToList();
+		List<KeyValuePair<string, int>> reorderedList = 
+			ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 	
-		//sort by highest to lowest
-		var val = from element in localLeaderboards
-                  orderby element.Value descending
-                  select element;
-
-		tmplist = val.ToList();
-
 		//rearrange entires
 		int i = 0;
 		GameObject tmpEntry;
 
-		foreach (KeyValuePair<string, int> pair in val)
+		foreach (KeyValuePair<string, int> pair in reorderedList)
         {
 			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
 			transform);
 
-			// set text fields
-			tmpEntry.GetComponent<PlayerRankData>().SetTextFields(pair.Key, pair.Value, i + 1);
+			// set text fields 
+			SetRankDataToTextField(pair.Key, pair.Value, i, tmpEntry);
 			playerScore_entries_UI.Add(tmpEntry); //is this necessary?
 			i++;
 		}
+	}
+
+	// sort leaderboard by highest to lowest
+	private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
+    {
+		// tmp list to sort elements in dictionary by value (aka: scpre)
+		List<KeyValuePair<string, int>> tmplist = data.ToList();
+	
+		var val = from element in data.ToList()
+				  orderby element.Value descending
+				  select element;
+		
+		return tmplist = val.ToList();
 	}
 }
 

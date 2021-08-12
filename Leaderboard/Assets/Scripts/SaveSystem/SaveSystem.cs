@@ -29,7 +29,7 @@ public class SaveSystem : MonoBehaviour
             string json = PlayerPrefs.GetString("SaveData");
             saveData = JsonUtility.FromJson<SavaData>(json);
             print("loaded datab");
-            Leaderboard.Instance.SetLocalLeaderboard(saveData.keys, saveData.values);
+            Leaderboard.Instance.SetLeaderboardData(saveData.keys, saveData.values);
         }
     }
 
