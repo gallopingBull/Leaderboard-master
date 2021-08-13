@@ -6,9 +6,12 @@ using PlayFab.ClientModels;
 public class PlayfabManager : MonoBehaviour
 {
     // Start is called before the first frame update
+    [HideInInspector]
+    public static PlayfabManager instance;
     void Start()
     {
-        
+        instance = this;
+        Login();
     }
     void Login()
     {
@@ -30,8 +33,8 @@ public class PlayfabManager : MonoBehaviour
         Debug.Log("error whole logging in/creating account!");
         Debug.Log(error.GenerateErrorReport());
     }
- 
-    
+   
+
     public void SendLeaderboard(int score)
     {
         var request = new UpdatePlayerStatisticsRequest
@@ -45,6 +48,31 @@ public class PlayfabManager : MonoBehaviour
                 }
             }
         };
-        //PlayFabClientAPI.update
+        PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnError);
+    }
+
+    
+    public void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
+    {
+        Debug.Log("successful leaderboard sent");
+    }
+
+    public void GetLeaderboard()
+    {
+        var request = new GetLeaderboardRequest
+        {
+            StatisticName = "score",
+            StartPosition = 0,
+            MaxResultsCount = 10
+        };
+        PlayFabClientAPI.GetLeaderboard(request, OnLeaderboardGet, OnError);
+    }
+
+    void OnLeaderboardGet(GetLeaderboardResult result)
+    {
+        foreach (var item in result.Leaderboard)
+        {
+            Debug.Log(item.Position + ""+ item.PlayFabId + "" +item.StatValue);
+        }
     }
 }

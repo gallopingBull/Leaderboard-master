@@ -35,17 +35,18 @@ public class SaveSystem : MonoBehaviour
 
     private void SaveData()
     {
-        //saveData.localLeaderBoardData.Clear();
+   
         saveData.keys.Clear();
         saveData.values.Clear();
 
-        //
         for (int i = 0; i< Leaderboard.Instance.GetLocalLeaderboard().Count; i++)
         {
+            PlayfabManager.instance.SendLeaderboard(Leaderboard.Instance.GetLocalLeaderboard()[i].Value);
+
             saveData.keys.Add(Leaderboard.Instance.GetLocalLeaderboard()[i].Key);
             saveData.values.Add (Leaderboard.Instance.GetLocalLeaderboard()[i].Value);
         }
-        //saveData.localLeaderBoardData = Leaderboard.Instance.GetLocalLeaderboard();
+
 
         var json =  JsonUtility.ToJson(saveData);
 
