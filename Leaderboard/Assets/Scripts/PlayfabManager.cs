@@ -5,9 +5,11 @@ using PlayFab;
 using PlayFab.ClientModels;
 public class PlayfabManager : MonoBehaviour
 {
+
     // Start is called before the first frame update
     [HideInInspector]
     public static PlayfabManager instance;
+
     void Start()
     {
         instance = this;
@@ -50,8 +52,6 @@ public class PlayfabManager : MonoBehaviour
         };
         PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnError);
     }
-
-    
     public void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
     {
         Debug.Log("successful leaderboard sent");
@@ -70,9 +70,18 @@ public class PlayfabManager : MonoBehaviour
 
     void OnLeaderboardGet(GetLeaderboardResult result)
     {
+        List<string> tmpKeys = new List<string>();
+        List<int> tmpValues = new List<int>();
         foreach (var item in result.Leaderboard)
         {
-            Debug.Log(item.Position + ""+ item.PlayFabId + "" +item.StatValue);
+            tmpKeys.Add(item.PlayFabId);
+            tmpValues.Add(item.StatValue);
+
+            //Debug.Log(item.Position + " || "+ item.PlayFabId + "" +item.StatValue);
+            Debug.Log(string.Format ("RANK: {0} | NAME: {1} | SCORE: {2}", item.Position, item.PlayFabId, item.StatValue));
         }
+
+        Leaderboard.Instance.SetLeaderboardData(tmpKeys, tmpValues);
+
     }
 }
