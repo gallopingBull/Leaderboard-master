@@ -4,8 +4,7 @@ using UnityEngine;
 using PlayFab;
 using PlayFab.ClientModels;
 public class PlayfabManager : MonoBehaviour
-{
-
+{ 
     // Start is called before the first frame update
     [HideInInspector]
     public static PlayfabManager instance;
