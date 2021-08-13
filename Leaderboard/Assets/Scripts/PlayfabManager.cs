@@ -35,7 +35,6 @@ public class PlayfabManager : MonoBehaviour
         Debug.Log(error.GenerateErrorReport());
     }
    
-
     public void SendLeaderboard(int score)
     {
         var request = new UpdatePlayerStatisticsRequest

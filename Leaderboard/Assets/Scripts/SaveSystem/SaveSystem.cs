@@ -30,14 +30,11 @@ public class SaveSystem : MonoBehaviour
             saveData = JsonUtility.FromJson<SavaData>(json);
             print("loaded data");
             Leaderboard.Instance.SetLeaderboardData(saveData.keys, saveData.values);
-
-
         }
     }
 
     private void SaveData()
     {
-   
         saveData.keys.Clear();
         saveData.values.Clear();
 
@@ -49,16 +46,12 @@ public class SaveSystem : MonoBehaviour
             saveData.values.Add (Leaderboard.Instance.GetLocalLeaderboard()[i].Value);
         }
 
-
         var json =  JsonUtility.ToJson(saveData);
-
 
         Debug.Log(json);
         PlayerPrefs.SetString("SaveData", json);
         PlayerPrefs.Save();
-
         //something here to store data in registry
-
     }
 }
 
