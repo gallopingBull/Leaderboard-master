@@ -42,7 +42,6 @@ public class Leaderboard : MonoBehaviour
 		//if (instance == null)
 			instance = this;
 
-		print(instance.gameObject.name);
     }
 
     // Start is called before the first frame update
@@ -56,9 +55,9 @@ public class Leaderboard : MonoBehaviour
 		// if no leaderboard has been created
 		// creeate new leaderboard with blank values
 		if (!init)
-			CreateLeaderboard();
+			CreateNewLeaderboard();
 
-		//set data in leaderboard fields
+		// set data in leaderboard fields
 		InitLocalLeadboard();
 	}
 
@@ -88,7 +87,7 @@ public class Leaderboard : MonoBehaviour
 	}
 	
 	// creeate new blank leaderboard with default rank data
-	private void CreateLeaderboard()
+	private void CreateNewLeaderboard()
     {
 		GameObject tmpEntry;
 		for (int i = 0; i < LeaderboardListSizeMAX; i++)
@@ -103,6 +102,8 @@ public class Leaderboard : MonoBehaviour
 	{
 
 		GameObject tmpEntry;
+
+
 		for (int i = 0; i < keys.Count; i++)
 		{
 			if (localLeaderboard.ContainsKey(keys[i])
@@ -110,11 +111,26 @@ public class Leaderboard : MonoBehaviour
             {
 				continue; 
             }
+
+
 			localLeaderboard.Add(keys[i], values[i]);
 			tmpEntry = playerScore_entries_UI[i];
 			SetRankDataToTextField(keys[i], values[i], i, tmpEntry);
 			playerScore_entries_UI.Add(tmpEntry); 
 		}
+
+
+		List<KeyValuePair<string, int>> reorderedList =
+ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
+		int f = 0;
+		foreach (KeyValuePair<string, int> pair in reorderedList)
+		{
+			tmpEntry = playerScore_entries_UI[f];
+			// set text fields 
+			SetRankDataToTextField(pair.Key, pair.Value, f, tmpEntry);
+			f++;
+		}
+
 	}
 	public List<KeyValuePair<string, int>> GetLocalLeaderboard()
 	{
@@ -134,14 +150,12 @@ public class Leaderboard : MonoBehaviour
 
 	public void Add_RankData_To_Leaderboard()
 	{
-		//destroy previous yu player rank panels if new score is added to leaderboard
-        if (playerScore_entries_UI.Count > 0)
-        {
-            foreach (GameObject item in playerScore_entries_UI)
-				Destroy(item.gameObject);
-		}
+		// destroy previous player rank panels if new score is added to leaderboard
+		if (playerScore_entries_UI.Count > 0)
+			DestroyLeaderboard();
+		
+		CreateNewLeaderboard();
 
-		CreateLeaderboard();
         #region input field stuff
         string _name = "";
 		string _score = "";
@@ -160,36 +174,53 @@ public class Leaderboard : MonoBehaviour
 			return;
 
 
-        #endregion
+		#endregion
 
-        localLeaderboard.Add(_name, score);
+		if (localLeaderboard.ContainsKey(_name) && 
+			localLeaderboard.ContainsValue(score))
+			return;
 
-		// tmp list to sort elements in dictionary by value (aka: scpre)
+		
+		localLeaderboard.Add(_name, score);
+
+		// tmp list to sort elements in dictionary by value (aka: score)
 		List<KeyValuePair<string, int>> reorderedList = 
 			ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 	
-		//rearrange entires
+		// reorder entires
 		int i = 0;
 		GameObject tmpEntry;
-
+		List<KeyValuePair<string, int>> tmpList = GetLocalLeaderboard();
+		
 		foreach (KeyValuePair<string, int> pair in reorderedList)
         {
-			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
-			transform);
-
+            if (i >=  LeaderboardListSizeMAX) {
+				for (int k = tmpList.ToList().Count - 1; k >= LeaderboardListSizeMAX; k--)
+					this.localLeaderboard.ToList().RemoveAt(k);
+				return;
+			}
+			
+			tmpEntry = playerScore_entries_UI[i];
 			// set text fields 
 			SetRankDataToTextField(pair.Key, pair.Value, i, tmpEntry);
-			playerScore_entries_UI.Add(tmpEntry); //is this necessary?
 			i++;
 		}
+
+		localLeaderboard.ToList().Clear();
+	}
+
+	// destroy current leaderboard
+	private void DestroyLeaderboard()
+    {
+		foreach (GameObject item in playerScore_entries_UI)
+			Destroy(item.gameObject);
+		playerScore_entries_UI.Clear();
 	}
 
 	public void SendLeaderboardToPlayfab()
 	{
 		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
-		{
 			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Value);
-		}
 	}
 
 	// sort leaderboard by highest to lowest
