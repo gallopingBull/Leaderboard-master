@@ -105,12 +105,15 @@ public class Leaderboard : MonoBehaviour
 		GameObject tmpEntry;
 		for (int i = 0; i < keys.Count; i++)
 		{
+			if (localLeaderboard.ContainsKey(keys[i])
+				&& localLeaderboard.ContainsValue(values[i]))
+            {
+				continue; 
+            }
 			localLeaderboard.Add(keys[i], values[i]);
 			tmpEntry = playerScore_entries_UI[i];
 			SetRankDataToTextField(keys[i], values[i], i, tmpEntry);
 			playerScore_entries_UI.Add(tmpEntry); 
-
-
 		}
 	}
 	public List<KeyValuePair<string, int>> GetLocalLeaderboard()
@@ -137,6 +140,8 @@ public class Leaderboard : MonoBehaviour
             foreach (GameObject item in playerScore_entries_UI)
 				Destroy(item.gameObject);
 		}
+
+		CreateLeaderboard();
         #region input field stuff
         string _name = "";
 		string _score = "";
@@ -147,6 +152,7 @@ public class Leaderboard : MonoBehaviour
 		_name = playerNameField.text;
 		_score = playerScoreField.GetComponent<TMP_InputField>().text;
 		score = int.Parse(_score);
+		PlayfabManager.instance.SubmitNameButton(_name);
 
 
 		if (_name == "" ||

@@ -19,14 +19,34 @@ public class PlayfabManager : MonoBehaviour
         var request = new LoginWithCustomIDRequest
         {
             CustomId = SystemInfo.deviceUniqueIdentifier,
-            CreateAccount = true
+            CreateAccount = true,
+            InfoRequestParameters = new GetPlayerCombinedInfoRequestParams
+            {
+                GetPlayerProfile = true
+            }
         };
-        PlayFabClientAPI.LoginWithCustomID(request, OnSuccess, OnError);
+        PlayFabClientAPI.LoginWithCustomID(request, OnLoginSuccess, OnError);
     }
 
-    void OnSuccess(LoginResult result)
+    void OnLoginSuccess(LoginResult result)
     {
         Debug.Log("successful login/account create");
+        string name = null;
+        if(result.InfoResultPayload.PlayerProfile != null)
+            name = result.InfoResultPayload.PlayerProfile.DisplayName;
+    }
+
+    public void SubmitNameButton(string name) {
+        var request = new UpdateUserTitleDisplayNameRequest
+        {
+            DisplayName = name
+        };
+        PlayFabClientAPI.UpdateUserTitleDisplayName(request, OnDisplayNameUpdate, OnError);
+    }
+
+    private void OnDisplayNameUpdate(UpdateUserTitleDisplayNameResult result)
+    {
+        Debug.Log("updated display name!");
     }
 
     void OnError(PlayFabError error)
@@ -72,11 +92,11 @@ public class PlayfabManager : MonoBehaviour
         List<int> tmpValues = new List<int>();
         foreach (var item in result.Leaderboard)
         {
-            tmpKeys.Add(item.PlayFabId);
+            tmpKeys.Add(item.DisplayName);
             tmpValues.Add(item.StatValue);
 
             //Debug.Log(item.Position + " || "+ item.PlayFabId + "" +item.StatValue);
-            Debug.Log(string.Format ("RANK: {0} | NAME: {1} | SCORE: {2}", item.Position, item.PlayFabId, item.StatValue));
+            Debug.Log(string.Format ("RANK: {0} | NAME: {1} | SCORE: {2}", item.Position, item.DisplayName, item.StatValue));
         }
 
         Leaderboard.Instance.SetLeaderboardData(tmpKeys, tmpValues);
