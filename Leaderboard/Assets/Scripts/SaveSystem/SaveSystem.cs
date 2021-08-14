@@ -14,14 +14,7 @@ public class SaveSystem : MonoBehaviour
     {
         saveData = new SavaData();
     }
-    private void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.P))
-            SaveData();
-
-        if (Input.GetKeyDown(KeyCode.L))
-            LoadData();
-    }
+    
     public void LoadData()
     {
         if (PlayerPrefs.HasKey("SaveData"))
@@ -33,15 +26,13 @@ public class SaveSystem : MonoBehaviour
         }
     }
 
-    private void SaveData()
+    public void SaveData()
     {
         saveData.keys.Clear();
         saveData.values.Clear();
 
         for (int i = 0; i< Leaderboard.Instance.GetLocalLeaderboard().Count; i++)
         {
-            PlayfabManager.instance.SendLeaderboard(Leaderboard.Instance.GetLocalLeaderboard()[i].Value);
-
             saveData.keys.Add(Leaderboard.Instance.GetLocalLeaderboard()[i].Key);
             saveData.values.Add (Leaderboard.Instance.GetLocalLeaderboard()[i].Value);
         }
@@ -50,8 +41,7 @@ public class SaveSystem : MonoBehaviour
 
         Debug.Log(json);
         PlayerPrefs.SetString("SaveData", json);
-        PlayerPrefs.Save();
-        //something here to store data in registry
+        PlayerPrefs.Save();        
     }
 }
 

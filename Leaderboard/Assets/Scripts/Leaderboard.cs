@@ -184,6 +184,14 @@ public class Leaderboard : MonoBehaviour
 		}
 	}
 
+	public void SendLeaderboardToPlayfab()
+	{
+		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
+		{
+			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Value);
+		}
+	}
+
 	// sort leaderboard by highest to lowest
 	private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
     {
