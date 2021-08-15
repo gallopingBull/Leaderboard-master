@@ -166,8 +166,6 @@ public class Leaderboard : MonoBehaviour
 		_name = playerNameField.text;
 		_score = playerScoreField.GetComponent<TMP_InputField>().text;
 		score = int.Parse(_score);
-		//PlayfabManager.instance.SubmitNameButton(_name);
-
 
 		if (_name == "" ||
 			score == 0)
@@ -208,6 +206,33 @@ public class Leaderboard : MonoBehaviour
 		}
 	}
 
+
+
+	private void GetTextField()
+    {
+		string _name = "";
+		string _score = "";
+
+		int score = 0;
+
+
+		_name = playerNameField.text;
+		_score = playerScoreField.GetComponent<TMP_InputField>().text;
+		score = int.Parse(_score);
+
+		if (_name == "" ||
+			score == 0)
+			return;
+	}
+
+	private bool IsTextFieldValid()
+    {
+
+
+		return false;
+    }
+
+
 	// creeate new blank leaderboard with default rank data
 	private void CreateNewLeaderboard()
 	{
@@ -228,6 +253,9 @@ public class Leaderboard : MonoBehaviour
 		playerScore_entries_UI.Clear();
 	}
 
+
+
+	// triggered by button
 	public void SendLeaderboardToPlayfab()
 	{
 		for (int i = 0; i < GetLocalLeaderboard().Count; i++)

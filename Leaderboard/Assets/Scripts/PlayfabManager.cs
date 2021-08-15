@@ -76,6 +76,7 @@ public class PlayfabManager : MonoBehaviour
         Debug.Log("successful leaderboard sent");
     }
 
+    // triggered by button
     public void GetLeaderboard()
     {
         var request = new GetLeaderboardRequest
