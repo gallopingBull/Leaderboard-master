@@ -55,7 +55,7 @@ public class PlayfabManager : MonoBehaviour
         Debug.Log(error.GenerateErrorReport());
     }
    
-    public void SendLeaderboard(int score)
+    public void SendLeaderboard(string _name, int score)
     {
         var request = new UpdatePlayerStatisticsRequest
         {
@@ -68,6 +68,7 @@ public class PlayfabManager : MonoBehaviour
                 }
             }
         };
+        SubmitNameButton(_name);
         PlayFabClientAPI.UpdatePlayerStatistics(request, OnLeaderboardUpdate, OnError);
     }
     public void OnLeaderboardUpdate(UpdatePlayerStatisticsResult result)
@@ -90,16 +91,15 @@ public class PlayfabManager : MonoBehaviour
     {
         List<string> tmpKeys = new List<string>();
         List<int> tmpValues = new List<int>();
+
         foreach (var item in result.Leaderboard)
         {
             tmpKeys.Add(item.DisplayName);
             tmpValues.Add(item.StatValue);
 
-            //Debug.Log(item.Position + " || "+ item.PlayFabId + "" +item.StatValue);
             Debug.Log(string.Format ("RANK: {0} | NAME: {1} | SCORE: {2}", item.Position, item.DisplayName, item.StatValue));
         }
 
         Leaderboard.Instance.SetLeaderboardData(tmpKeys, tmpValues);
-
     }
 }

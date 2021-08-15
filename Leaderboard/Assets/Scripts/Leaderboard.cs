@@ -10,9 +10,9 @@ public class Leaderboard : MonoBehaviour
 	[SerializeField]
 	private static Leaderboard instance;
 
-	private enum LeaderboardStates
+	private enum LeaderboardTypes
     {
-		init, local, online
+		local, online
     }
 
 	[SerializeField]
@@ -90,14 +90,17 @@ public class Leaderboard : MonoBehaviour
 	
 	public void SetLeaderboardData(List<string> keys, List<int> values)
 	{
+		localLeaderboard.Clear();
+		DestroyLeaderboard();
+		CreateNewLeaderboard();
+
 		GameObject tmpEntry;
 
 		for (int i = 0; i < keys.Count; i++)
 		{
-			if (localLeaderboard.ContainsKey(keys[i])
-				&& localLeaderboard.ContainsValue(values[i]))
+			if (localLeaderboard.ContainsKey(keys[i]))
 				continue;
-
+			
 			localLeaderboard.Add(keys[i], values[i]);
 			tmpEntry = playerScore_entries_UI[i];
 			SetRankDataToTextField(keys[i], values[i], i, tmpEntry);
@@ -124,6 +127,7 @@ public class Leaderboard : MonoBehaviour
 	public void SetLocalLeaderboard(List<KeyValuePair<string, int>> list)
 	{
 		localLeaderboard.Clear();
+
 
 		foreach (var item in list)
         {
@@ -227,7 +231,7 @@ public class Leaderboard : MonoBehaviour
 	public void SendLeaderboardToPlayfab()
 	{
 		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
-			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Value);
+			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Key, GetLocalLeaderboard()[i].Value);
 	}
 
     #region sorting functions
