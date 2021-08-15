@@ -31,10 +31,14 @@ public class SaveSystem : MonoBehaviour
         saveData.keys.Clear();
         saveData.values.Clear();
 
-        for (int i = 0; i< Leaderboard.Instance.GetLocalLeaderboard().Count; i++)
+        List<KeyValuePair<string, int>> tmpList = new List<KeyValuePair<string, int>>();
+        tmpList = Leaderboard.Instance.GetLocalLeaderboard();
+
+
+        for (int i = 0; i< tmpList.Count; i++)
         {
-            saveData.keys.Add(Leaderboard.Instance.GetLocalLeaderboard()[i].Key);
-            saveData.values.Add (Leaderboard.Instance.GetLocalLeaderboard()[i].Value);
+            saveData.keys.Add(tmpList[i].Key);
+            saveData.values.Add (tmpList[i].Value);
         }
 
         var json =  JsonUtility.ToJson(saveData);

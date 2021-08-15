@@ -17,7 +17,7 @@ public class Leaderboard : MonoBehaviour
 
 	[SerializeField]
 	private Dictionary<string, int> leaderboard = new Dictionary<string, int>();
-	[SerializeField]
+	[HideInInspector]
 	public Dictionary<string, int> localLeaderboard = new Dictionary<string, int>();
 	[SerializeField]
 	private Dictionary<string, int> onlineLeaderboard = new Dictionary<string, int>();
@@ -39,9 +39,11 @@ public class Leaderboard : MonoBehaviour
 
     private void Awake()
     {
-		//if (instance == null)
+		if (instance == null)
+        {
 			instance = this;
-
+			print(instance.name);
+		}
     }
 
     // Start is called before the first frame update
@@ -71,7 +73,6 @@ public class Leaderboard : MonoBehaviour
 			List<KeyValuePair<string, int>> reorderedList =
 				ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 
-
 			int i = 0;
 			foreach (KeyValuePair<string, int> pair in reorderedList)
             {
@@ -86,32 +87,16 @@ public class Leaderboard : MonoBehaviour
 		//init = true;
 	}
 	
-	// creeate new blank leaderboard with default rank data
-	private void CreateNewLeaderboard()
-    {
-		GameObject tmpEntry;
-		for (int i = 0; i < LeaderboardListSizeMAX; i++)
-		{
-			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
-			transform);
-			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
-		}
-	}
-
+	
 	public void SetLeaderboardData(List<string> keys, List<int> values)
 	{
-
 		GameObject tmpEntry;
-
 
 		for (int i = 0; i < keys.Count; i++)
 		{
 			if (localLeaderboard.ContainsKey(keys[i])
 				&& localLeaderboard.ContainsValue(values[i]))
-            {
-				continue; 
-            }
-
+				continue;
 
 			localLeaderboard.Add(keys[i], values[i]);
 			tmpEntry = playerScore_entries_UI[i];
@@ -121,7 +106,7 @@ public class Leaderboard : MonoBehaviour
 
 
 		List<KeyValuePair<string, int>> reorderedList =
-ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
+			ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 		int f = 0;
 		foreach (KeyValuePair<string, int> pair in reorderedList)
 		{
@@ -130,12 +115,17 @@ ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 			SetRankDataToTextField(pair.Key, pair.Value, f, tmpEntry);
 			f++;
 		}
-
 	}
+
 	public List<KeyValuePair<string, int>> GetLocalLeaderboard()
 	{
 		return localLeaderboard.ToList();
 	}
+	public void SetLocalLeaderboard(Dictionary<string, int> dict)
+	{
+		localLeaderboard = dict;
+	}
+
 
 	private void SetRankDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
 	{
@@ -166,7 +156,7 @@ ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 		_name = playerNameField.text;
 		_score = playerScoreField.GetComponent<TMP_InputField>().text;
 		score = int.Parse(_score);
-		PlayfabManager.instance.SubmitNameButton(_name);
+		//PlayfabManager.instance.SubmitNameButton(_name);
 
 
 		if (_name == "" ||
@@ -190,13 +180,16 @@ ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 		// reorder entires
 		int i = 0;
 		GameObject tmpEntry;
-		List<KeyValuePair<string, int>> tmpList = GetLocalLeaderboard();
 		
 		foreach (KeyValuePair<string, int> pair in reorderedList)
         {
             if (i >=  LeaderboardListSizeMAX) {
-				for (int k = tmpList.ToList().Count - 1; k >= LeaderboardListSizeMAX; k--)
-					this.localLeaderboard.ToList().RemoveAt(k);
+				for (int k = reorderedList.Count - 1; k >= LeaderboardListSizeMAX; k--)
+                {
+					localLeaderboard.Remove(localLeaderboard.ToList()[k].Key);
+				}
+
+				SetLocalLeaderboard(localLeaderboard);
 				return;
 			}
 			
@@ -205,8 +198,18 @@ ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 			SetRankDataToTextField(pair.Key, pair.Value, i, tmpEntry);
 			i++;
 		}
+	}
 
-		localLeaderboard.ToList().Clear();
+	// creeate new blank leaderboard with default rank data
+	private void CreateNewLeaderboard()
+	{
+		GameObject tmpEntry;
+		for (int i = 0; i < LeaderboardListSizeMAX; i++)
+		{
+			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
+			transform);
+			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
+		}
 	}
 
 	// destroy current leaderboard
@@ -223,8 +226,9 @@ ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Value);
 	}
 
-	// sort leaderboard by highest to lowest
-	private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
+    #region sorting functions
+    // sort leaderboard by highest to lowest
+    private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
     {
 		// tmp list to sort elements in dictionary by value (aka: scpre)
 		List<KeyValuePair<string, int>> tmplist = data.ToList();
@@ -235,5 +239,7 @@ ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
 		
 		return tmplist = val.ToList();
 	}
+    #endregion
+
 }
 
