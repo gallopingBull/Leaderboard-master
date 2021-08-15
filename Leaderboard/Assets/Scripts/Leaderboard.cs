@@ -121,9 +121,15 @@ public class Leaderboard : MonoBehaviour
 	{
 		return localLeaderboard.ToList();
 	}
-	public void SetLocalLeaderboard(Dictionary<string, int> dict)
+	public void SetLocalLeaderboard(List<KeyValuePair<string, int>> list)
 	{
-		localLeaderboard = dict;
+		localLeaderboard.Clear();
+
+		foreach (var item in list)
+        {
+			localLeaderboard.Add(item.Key, item.Value);
+        }
+		//localLeaderboard = dict;
 	}
 
 
@@ -185,11 +191,9 @@ public class Leaderboard : MonoBehaviour
         {
             if (i >=  LeaderboardListSizeMAX) {
 				for (int k = reorderedList.Count - 1; k >= LeaderboardListSizeMAX; k--)
-                {
-					localLeaderboard.Remove(localLeaderboard.ToList()[k].Key);
-				}
+					reorderedList.Remove(reorderedList[k]);
 
-				SetLocalLeaderboard(localLeaderboard);
+				SetLocalLeaderboard(reorderedList);
 				return;
 			}
 			
@@ -240,6 +244,7 @@ public class Leaderboard : MonoBehaviour
 		return tmplist = val.ToList();
 	}
     #endregion
+
 
 }
 
