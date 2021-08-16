@@ -6,6 +6,8 @@ using UnityEngine.Networking;
 
 public class dreamloLeaderBoard : MonoBehaviour {
 
+
+
 	string dreamloWebserviceURL = "http://dreamlo.com/lb/";
 
 	public bool IUpgradedAndGotSSL = false;
@@ -48,6 +50,7 @@ public class dreamloLeaderBoard : MonoBehaviour {
 		}
 
 		this.highScores = "";
+		GetScores();
 	}
 	
 	public static dreamloLeaderBoard GetSceneDreamloLeaderboard()

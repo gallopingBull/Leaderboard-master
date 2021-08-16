@@ -81,7 +81,7 @@ namespace PlayFab.Internal
                 yield return request.Send();
 #endif
 
-                if (request.isNetworkError || request.isHttpError)
+                if (request.result == UnityWebRequest.Result.ProtocolError /* || request.isHttpError*/)
                 {
                     errorCallback(request.error);
                 }

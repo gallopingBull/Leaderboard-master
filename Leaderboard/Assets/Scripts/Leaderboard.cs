@@ -2,7 +2,8 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
-using TMPro;	
+using TMPro;
+
 using UnityEngine;
 [Serializable]
 public class Leaderboard : MonoBehaviour
@@ -11,9 +12,9 @@ public class Leaderboard : MonoBehaviour
 	private static Leaderboard instance;
 
 	private enum LeaderboardTypes
-    {
+	{
 		local, online
-    }
+	}
 
 	[SerializeField]
 	private Dictionary<string, int> leaderboard = new Dictionary<string, int>();
@@ -22,7 +23,7 @@ public class Leaderboard : MonoBehaviour
 	[SerializeField]
 	private Dictionary<string, int> onlineLeaderboard = new Dictionary<string, int>();
 
-	private bool init = false; 
+	private bool init = false;
 
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
@@ -35,24 +36,28 @@ public class Leaderboard : MonoBehaviour
 	[SerializeField]
 	private int LeaderboardListSizeMAX = 10;
 
-    public static Leaderboard Instance { get => instance;}
+	private dreamloLeaderBoard dreamLoManager;
 
-    private void Awake()
-    {
+	public static Leaderboard Instance { get => instance; }
+
+	private void Awake()
+	{
 		if (instance == null)
-        {
+		{
 			instance = this;
 			print(instance.name);
 		}
-    }
+	}
 
-    // Start is called before the first frame update
-    void Start()
+	// Start is called before the first frame update
+	void Start()
 	{
 		//player_Score_UITemplate_Prefab = GameObject.Find("Panel_Player_Score_Row_Template");
 		playerScore_entries_UI = new List<GameObject>();
 		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
 		playerScoreField = GameObject.Find("InputField_PlayerScore");
+
+		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
 
 		// if no leaderboard has been created
 		// creeate new leaderboard with blank values
@@ -75,7 +80,7 @@ public class Leaderboard : MonoBehaviour
 
 			int i = 0;
 			foreach (KeyValuePair<string, int> pair in reorderedList)
-            {
+			{
 				if (i == reorderedList.Count)
 					return;
 				SetRankDataToTextField(pair.Key, pair.Value, i, playerScore_entries_UI[i]); // do not like the way im sending
@@ -83,11 +88,11 @@ public class Leaderboard : MonoBehaviour
 				i++;
 			}
 		}
-		
+
 		//init = true;
 	}
-	
-	
+
+
 	public void SetLeaderboardData(List<string> keys, List<int> values)
 	{
 		localLeaderboard.Clear();
@@ -100,11 +105,11 @@ public class Leaderboard : MonoBehaviour
 		{
 			if (localLeaderboard.ContainsKey(keys[i]))
 				continue;
-			
+
 			localLeaderboard.Add(keys[i], values[i]);
 			tmpEntry = playerScore_entries_UI[i];
 			SetRankDataToTextField(keys[i], values[i], i, tmpEntry);
-			playerScore_entries_UI.Add(tmpEntry); 
+			playerScore_entries_UI.Add(tmpEntry);
 		}
 
 
@@ -130,9 +135,9 @@ public class Leaderboard : MonoBehaviour
 
 
 		foreach (var item in list)
-        {
+		{
 			localLeaderboard.Add(item.Key, item.Value);
-        }
+		}
 		//localLeaderboard = dict;
 	}
 
@@ -153,13 +158,13 @@ public class Leaderboard : MonoBehaviour
 		// destroy previous player rank panels if new score is added to leaderboard
 		if (playerScore_entries_UI.Count > 0)
 			DestroyLeaderboard();
-		
+
 		CreateNewLeaderboard();
 
-        #region input field stuff
-        string _name = "";
+		#region input field stuff
+		string _name = "";
 		string _score = "";
-		
+
 		int score = 0;
 
 
@@ -174,31 +179,31 @@ public class Leaderboard : MonoBehaviour
 
 		#endregion
 
-		if (localLeaderboard.ContainsKey(_name) && 
+		if (localLeaderboard.ContainsKey(_name) &&
 			localLeaderboard.ContainsValue(score))
 			return;
 
-		
+
 		localLeaderboard.Add(_name, score);
 
 		// tmp list to sort elements in dictionary by value (aka: score)
-		List<KeyValuePair<string, int>> reorderedList = 
+		List<KeyValuePair<string, int>> reorderedList =
 			ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
-	
+
 		// reorder entires
 		int i = 0;
 		GameObject tmpEntry;
-		
+
 		foreach (KeyValuePair<string, int> pair in reorderedList)
-        {
-            if (i >=  LeaderboardListSizeMAX) {
+		{
+			if (i >= LeaderboardListSizeMAX) {
 				for (int k = reorderedList.Count - 1; k >= LeaderboardListSizeMAX; k--)
 					reorderedList.Remove(reorderedList[k]);
 
 				SetLocalLeaderboard(reorderedList);
 				return;
 			}
-			
+
 			tmpEntry = playerScore_entries_UI[i];
 			// set text fields 
 			SetRankDataToTextField(pair.Key, pair.Value, i, tmpEntry);
@@ -209,7 +214,7 @@ public class Leaderboard : MonoBehaviour
 
 
 	private void GetTextField()
-    {
+	{
 		string _name = "";
 		string _score = "";
 
@@ -226,11 +231,9 @@ public class Leaderboard : MonoBehaviour
 	}
 
 	private bool IsTextFieldValid()
-    {
-
-
+	{
 		return false;
-    }
+	}
 
 
 	// creeate new blank leaderboard with default rank data
@@ -247,12 +250,44 @@ public class Leaderboard : MonoBehaviour
 
 	// destroy current leaderboard
 	private void DestroyLeaderboard()
-    {
+	{
 		foreach (GameObject item in playerScore_entries_UI)
 			Destroy(item.gameObject);
 		playerScore_entries_UI.Clear();
 	}
 
+
+
+	public void SendLeaderboardToDreamLo()
+	{
+		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
+			dreamLoManager.AddScore(GetLocalLeaderboard()[i].Key, GetLocalLeaderboard()[i].Value);
+	}
+
+	
+	public void GetLeaderboardFromDreamLo()
+	{
+		
+
+		List<dreamloLeaderBoard.Score> scoreList = dreamLoManager.ToListHighToLow();
+		if (scoreList == null)
+		{
+			print("(loading...)");
+		}
+		else
+		{
+			List<string> tmpKeys = new List<string>();
+			List<int> tmpValues = new List<int>();
+			foreach (var item in scoreList)
+			{
+				tmpKeys.Add(item.playerName);
+				tmpValues.Add(item.score);
+			}
+
+			SetLeaderboardData(tmpKeys, tmpValues);
+
+		}
+	}
 
 
 	// triggered by button
@@ -276,7 +311,6 @@ public class Leaderboard : MonoBehaviour
 		return tmplist = val.ToList();
 	}
     #endregion
-
 
 }
 
