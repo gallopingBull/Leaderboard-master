@@ -637,7 +637,15 @@ PrefabInstance:
     - target: {fileID: 556678979, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 
-      objectReference: {fileID: 963194230}
+      objectReference: {fileID: 1985308838}
+    - target: {fileID: 556678979, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_MethodName
+      value: ResetLeaderboard
+      objectReference: {fileID: 0}
+    - target: {fileID: 556678979, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
+      propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_TargetAssemblyTypeName
+      value: Leaderboard, Assembly-CSharp
+      objectReference: {fileID: 0}
     - target: {fileID: 838646895, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
       value: 

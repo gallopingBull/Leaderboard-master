@@ -256,7 +256,11 @@ public class Leaderboard : MonoBehaviour
 		playerScore_entries_UI.Clear();
 	}
 
-
+	public void ResetLeaderboard()
+    {
+		DestroyLeaderboard();
+		CreateNewLeaderboard();
+    }
 
 	public void SendLeaderboardToDreamLo()
 	{
