@@ -51,13 +51,6 @@ public class Leaderboard : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
-		//player_Score_UITemplate_Prefab = GameObject.Find("Panel_Player_Score_Row_Template");
-		playerScore_entries_UI = new List<GameObject>();
-		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
-		playerScoreField = GameObject.Find("InputField_PlayerScore");
-
-		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
-
 		// if no leaderboard has been created
 		// creeate new leaderboard with blank values
 		if (!init)
@@ -70,6 +63,14 @@ public class Leaderboard : MonoBehaviour
 
 	private void InitLocalLeadboard()
 	{
+
+		playerScore_entries_UI = new List<GameObject>();
+		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
+		playerScoreField = GameObject.Find("InputField_PlayerScore");
+
+		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
+
+
 		// copy player score data into list
 		if (localLeaderboard.Count > 0)
 		{
@@ -140,12 +141,6 @@ public class Leaderboard : MonoBehaviour
 	private void SetRankDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
 	{
 		rank_UI_Panel.GetComponent<PlayerRankData>().SetTextFields(key, value, index + 1);
-	}
-
-	// create leaderboard rank UI panels and assign correct
-	// data to TMP text fields
-	private void InitOnlineLeadboard()
-	{
 	}
 
 	public void AddLeaderboardEntry()
