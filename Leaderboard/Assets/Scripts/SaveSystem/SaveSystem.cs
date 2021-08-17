@@ -32,7 +32,7 @@ public class SaveSystem : MonoBehaviour
         saveData.values.Clear();
 
         List<KeyValuePair<string, int>> tmpList = new List<KeyValuePair<string, int>>();
-        tmpList = Leaderboard.Instance.GetLocalLeaderboard();
+        tmpList = Leaderboard.Instance.GetLeaderboardList();
 
 
         for (int i = 0; i< tmpList.Count; i++)

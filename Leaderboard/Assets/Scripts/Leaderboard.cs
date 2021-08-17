@@ -45,7 +45,6 @@ public class Leaderboard : MonoBehaviour
 		if (instance == null)
 		{
 			instance = this;
-			print(instance.name);
 		}
 	}
 
@@ -125,7 +124,7 @@ public class Leaderboard : MonoBehaviour
 		}
 	}
 
-	public List<KeyValuePair<string, int>> GetLocalLeaderboard()
+	public List<KeyValuePair<string, int>> GetLeaderboardList()
 	{
 		return localLeaderboard.ToList();
 	}
@@ -133,14 +132,10 @@ public class Leaderboard : MonoBehaviour
 	{
 		localLeaderboard.Clear();
 
-
 		foreach (var item in list)
-		{
 			localLeaderboard.Add(item.Key, item.Value);
-		}
 		//localLeaderboard = dict;
 	}
-
 
 	private void SetRankDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
 	{
@@ -153,38 +148,20 @@ public class Leaderboard : MonoBehaviour
 	{
 	}
 
-	public void Add_RankData_To_Leaderboard()
+	public void AddLeaderboardEntry()
 	{
-		// destroy previous player rank panels if new score is added to leaderboard
+		// destroy previous pla	yer rank panels if new score is added to leaderboard
 		if (playerScore_entries_UI.Count > 0)
 			DestroyLeaderboard();
 
 		CreateNewLeaderboard();
 
-		#region input field stuff
-		string _name = "";
-		string _score = "";
-
-		int score = 0;
-
-
-		_name = playerNameField.text;
-		_score = playerScoreField.GetComponent<TMP_InputField>().text;
-		score = int.Parse(_score);
-
-		if (_name == "" ||
-			score == 0)
+		KeyValuePair<string, int> tmp = GetTextField();
+	
+		if (!IsEntryValid(tmp.Key, tmp.Value))
 			return;
 
-
-		#endregion
-
-		if (localLeaderboard.ContainsKey(_name) &&
-			localLeaderboard.ContainsValue(score))
-			return;
-
-
-		localLeaderboard.Add(_name, score);
+		localLeaderboard.Add(tmp.Key, tmp.Value);
 
 		// tmp list to sort elements in dictionary by value (aka: score)
 		List<KeyValuePair<string, int>> reorderedList =
@@ -211,9 +188,7 @@ public class Leaderboard : MonoBehaviour
 		}
 	}
 
-
-
-	private void GetTextField()
+	private KeyValuePair<string, int> GetTextField()
 	{
 		string _name = "";
 		string _score = "";
@@ -225,17 +200,31 @@ public class Leaderboard : MonoBehaviour
 		_score = playerScoreField.GetComponent<TMP_InputField>().text;
 		score = int.Parse(_score);
 
-		if (_name == "" ||
-			score == 0)
-			return;
+
+		KeyValuePair<string, int> tmp = new KeyValuePair<string, int>(_name, score);
+		return tmp;
 	}
 
-	private bool IsTextFieldValid()
-	{
-		return false;
-	}
+	// check if there's duplicate scores/names 
+	private bool IsEntryValid(string _name, int _score)
+    {
+		if (localLeaderboard.ContainsKey(_name) &&
+            localLeaderboard.ContainsValue(_score))
+        {
+			Debug.Log("Entry with similar name and score already exists");
+			Debug.Log("Please change your name");
+			return false;
+		}
 
-
+		if (_name == "" || _score == 0)
+        {
+			Debug.Log("nothing assigned in text field");
+			return false;
+		}
+			
+		return true; 
+    }
+	
 	// creeate new blank leaderboard with default rank data
 	private void CreateNewLeaderboard()
 	{
@@ -261,14 +250,13 @@ public class Leaderboard : MonoBehaviour
 		DestroyLeaderboard();
 		CreateNewLeaderboard();
     }
-
-	public void SendLeaderboardToDreamLo()
+	// triggered by UI button
+	public void SendLeaderboardToDreamLo()	
 	{
-		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
-			dreamLoManager.AddScore(GetLocalLeaderboard()[i].Key, GetLocalLeaderboard()[i].Value);
+		for (int i = 0; i < GetLeaderboardList().Count; i++)
+			dreamLoManager.AddScore(GetLeaderboardList()[i].Key, GetLeaderboardList()[i].Value);
 	}
 
-	
 	public void GetLeaderboardFromDreamLo()
 	{
 		
@@ -294,12 +282,13 @@ public class Leaderboard : MonoBehaviour
 	}
 
 
-	// triggered by button
+	/*
 	public void SendLeaderboardToPlayfab()
 	{
 		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
 			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Key, GetLocalLeaderboard()[i].Value);
 	}
+	*/
 
     #region sorting functions
     // sort leaderboard by highest to lowest
