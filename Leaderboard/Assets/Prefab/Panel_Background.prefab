@@ -1149,7 +1149,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 531009005, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Leaderboard, Assembly-CSharp
         m_MethodName: ResetLeaderboard
         m_Mode: 1
@@ -2426,7 +2426,7 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 531009005, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
+      - m_Target: {fileID: 0}
         m_TargetAssemblyTypeName: Leaderboard, Assembly-CSharp
         m_MethodName: AddLeaderboardEntry
         m_Mode: 1

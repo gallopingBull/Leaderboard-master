@@ -2,19 +2,21 @@ using System;
 using System.Collections;
 using System.Linq;
 using System.Collections.Generic;
+using UnityEngine.UI;
 using TMPro;
-
 using UnityEngine;
+
 [Serializable]
 public class Leaderboard : MonoBehaviour
 {
 	[SerializeField]
 	private static Leaderboard instance;
 
-	private enum LeaderboardTypes
+	public enum LeaderboardStates
 	{
-		local, online
+		entry, local, online
 	}
+	private LeaderboardStates currentState; 
 
 	[SerializeField]
 	private Dictionary<string, int> leaderboard = new Dictionary<string, int>();
@@ -27,10 +29,11 @@ public class Leaderboard : MonoBehaviour
 
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
-
+	private Button submitEntry_Button;
+	
+	private GameObject submitEntryPrompt;
 	private Transform entryParent;
 	
-
 	[SerializeField]
 	private GameObject player_Score_UITemplate_Prefab; //ref to instantiate
 	private List<GameObject> playerScore_entries_UI;
@@ -45,9 +48,7 @@ public class Leaderboard : MonoBehaviour
 	private void Awake()
 	{
 		if (instance == null)
-		{
 			instance = this;
-		}
 	}
 
 	// Start is called before the first frame update
@@ -57,11 +58,14 @@ public class Leaderboard : MonoBehaviour
 		playerScore_entries_UI = new List<GameObject>();
 		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
 		playerScoreField = GameObject.Find("InputField_PlayerScore");
+		//submitEntry_Button = GameObject.Find("").GetComponent<Button>();
 
+		submitEntryPrompt = GameObject.Find("Button_SubmitEntry");
+		
 		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
-		// if no leaderboard has been created
-		// creeate new leaderboard with blank values
-		if (!init)
+        // if no leaderboard has been created
+        // creeate new leaderboard with blank values
+        if (!init)
 			CreateNewLeaderboard();
 
 		// set data in leaderboard fields
@@ -87,7 +91,6 @@ public class Leaderboard : MonoBehaviour
 				i++;
 			}
 		}
-
 		//init = true;
 	}
 
@@ -180,6 +183,11 @@ public class Leaderboard : MonoBehaviour
 		}
 	}
 
+	private void EnablePlayerNameEntryPrompt()
+    {
+
+    }
+
 	private KeyValuePair<string, int> GetTextField()
 	{
 		string _name = "";
@@ -243,8 +251,48 @@ public class Leaderboard : MonoBehaviour
 		CreateNewLeaderboard();
     }
 	
+	public void EnterState(LeaderboardStates _state)
+    {
+		ExitState(currentState);
+        switch (_state)	
+        {
+            case LeaderboardStates.entry:
+				currentState = LeaderboardStates.entry;
+				EnablePlayerNameEntryPrompt();
+                break;
+            case LeaderboardStates.local:
+				currentState = LeaderboardStates.local;
+				leaderboard = localLeaderboard;
+                break;
+
+            case LeaderboardStates.online:
+				currentState = LeaderboardStates.online;
+				leaderboard = onlineLeaderboard;
+				break;
+
+            default:
+                break;
+        }
+    }
+
+	void ExitState(LeaderboardStates _state)
+	{
+		switch (_state)
+		{
+			case LeaderboardStates.entry:
+				break;
+			case LeaderboardStates.local:
+				break;
+			case LeaderboardStates.online:
+				break;
+			default:
+				break;
+		}
+	}
+
+
 	// triggered by UI button
-	public void SendLeaderboardToDreamLo()	
+	public void SendLeaderboardToDreamLo()
 	{
 		for (int i = 0; i < GetLeaderboardList().Count; i++)
 			dreamLoManager.AddScore(GetLeaderboardList()[i].Key, GetLeaderboardList()[i].Value);
@@ -266,16 +314,15 @@ public class Leaderboard : MonoBehaviour
 				tmpKeys.Add(item.playerName);
 				tmpValues.Add(item.score);
 			}
-
 			SetLeaderboardData(tmpKeys, tmpValues);
-
 		}
 	}
 
 
-    #region sorting functions
-    // sort leaderboard by highest to lowest
-    private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
+
+	#region sorting functions
+	// sort leaderboard by highest to lowest
+	private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
     {
 		// tmp list to sort elements in dictionary by value (aka: scpre)
 		List<KeyValuePair<string, int>> tmplist = data.ToList();

@@ -48,7 +48,7 @@ public class dreamloLeaderBoard : MonoBehaviour {
 		}
 
 		this.highScores = "";
-		GetScore();
+		GetScore(); // maybe init thhis in leaderboard???
 	}
 	
 	public static dreamloLeaderBoard GetSceneDreamloLeaderboard()
