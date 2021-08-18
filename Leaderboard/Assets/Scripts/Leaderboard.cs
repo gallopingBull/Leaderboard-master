@@ -28,6 +28,8 @@ public class Leaderboard : MonoBehaviour
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
 
+	private Transform entryParent;
+	
 
 	[SerializeField]
 	private GameObject player_Score_UITemplate_Prefab; //ref to instantiate
@@ -51,6 +53,12 @@ public class Leaderboard : MonoBehaviour
 	// Start is called before the first frame update
 	void Start()
 	{
+		entryParent = GameObject.Find("Panel_List").transform;
+		playerScore_entries_UI = new List<GameObject>();
+		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
+		playerScoreField = GameObject.Find("InputField_PlayerScore");
+
+		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
 		// if no leaderboard has been created
 		// creeate new leaderboard with blank values
 		if (!init)
@@ -60,17 +68,8 @@ public class Leaderboard : MonoBehaviour
 		InitLocalLeadboard();
 	}
 
-
 	private void InitLocalLeadboard()
 	{
-
-		playerScore_entries_UI = new List<GameObject>();
-		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
-		playerScoreField = GameObject.Find("InputField_PlayerScore");
-
-		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
-
-
 		// copy player score data into list
 		if (localLeaderboard.Count > 0)
 		{
@@ -91,7 +90,6 @@ public class Leaderboard : MonoBehaviour
 
 		//init = true;
 	}
-
 
 	public void SetLeaderboardData(List<string> keys, List<int> values)
 	{
@@ -135,7 +133,6 @@ public class Leaderboard : MonoBehaviour
 
 		foreach (var item in list)
 			localLeaderboard.Add(item.Key, item.Value);
-		//localLeaderboard = dict;
 	}
 
 	private void SetRankDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
@@ -226,8 +223,8 @@ public class Leaderboard : MonoBehaviour
 		GameObject tmpEntry;
 		for (int i = 0; i < LeaderboardListSizeMAX; i++)
 		{
-			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, transform.position, transform.rotation,
-			transform);
+			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, entryParent.position, entryParent.rotation,
+			entryParent);
 			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
 		}
 	}
@@ -245,6 +242,7 @@ public class Leaderboard : MonoBehaviour
 		DestroyLeaderboard();
 		CreateNewLeaderboard();
     }
+	
 	// triggered by UI button
 	public void SendLeaderboardToDreamLo()	
 	{
@@ -254,8 +252,6 @@ public class Leaderboard : MonoBehaviour
 
 	public void GetLeaderboardFromDreamLo()
 	{
-		
-
 		List<dreamloLeaderBoard.Score> scoreList = dreamLoManager.ToListHighToLow();
 		if (scoreList == null)
 		{
@@ -277,14 +273,6 @@ public class Leaderboard : MonoBehaviour
 	}
 
 
-	/*
-	public void SendLeaderboardToPlayfab()
-	{
-		for (int i = 0; i < GetLocalLeaderboard().Count; i++)
-			PlayfabManager.instance.SendLeaderboard(GetLocalLeaderboard()[i].Key, GetLocalLeaderboard()[i].Value);
-	}
-	*/
-
     #region sorting functions
     // sort leaderboard by highest to lowest
     private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
@@ -302,3 +290,7 @@ public class Leaderboard : MonoBehaviour
 
 }
 
+//implemented in GameManager to send player score to leadeboard
+public interface ILeaderboard{
+	int SendScore();
+}

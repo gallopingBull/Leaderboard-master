@@ -6,8 +6,6 @@ using UnityEngine.Networking;
 
 public class dreamloLeaderBoard : MonoBehaviour {
 
-
-
 	string dreamloWebserviceURL = "http://dreamlo.com/lb/";
 
 	public bool IUpgradedAndGotSSL = false;
@@ -44,13 +42,13 @@ public class dreamloLeaderBoard : MonoBehaviour {
 			dreamloWebserviceURL = "https://www.dreamlo.com/lb/";
 		}
 		else {
-#if UNITY_WEBGL || UNITY_IOS || UNITY_ANDROID
-		Debug.LogWarning("dreamlo may require https for WEBGL / IOS / ANDROID builds.");
-#endif
+			#if UNITY_WEBGL || UNITY_IOS || UNITY_ANDROID
+			Debug.LogWarning("dreamlo may require https for WEBGL / IOS / ANDROID builds.");
+			#endif
 		}
 
 		this.highScores = "";
-		GetScores();
+		GetScore();
 	}
 	
 	public static dreamloLeaderBoard GetSceneDreamloLeaderboard()
@@ -102,7 +100,7 @@ public class dreamloLeaderBoard : MonoBehaviour {
 		StartCoroutine(GetRequest(dreamloWebserviceURL + privateCode + "/add-pipe/" + UnityWebRequest.EscapeURL(playerName) + "/" + totalScore.ToString() + "/" + totalSeconds.ToString()+ "/" + shortText));
 	}
 	
-	void GetScores()
+	void GetScore()
 	{
 		highScores = "";
 		StartCoroutine(GetRequest(dreamloWebserviceURL +  publicCode  + "/pipe"));
