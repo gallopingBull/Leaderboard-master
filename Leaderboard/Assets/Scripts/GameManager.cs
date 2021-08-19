@@ -5,8 +5,7 @@ using UnityEngine;
 public class GameManager : MonoBehaviour, ILeaderboard
 {
     public static GameManager instance; 
-    public int score = 10; 
-    
+    public int score = 100; 
     
     void Start()
     {
@@ -17,13 +16,5 @@ public class GameManager : MonoBehaviour, ILeaderboard
     {
         Debug.Log("sending score to leaderboard");
         return score;
-    }
-
-
-
-    void Update()
-    {
-        if (Input.GetKeyDown(KeyCode.A))
-            SendScore();
     }
 }

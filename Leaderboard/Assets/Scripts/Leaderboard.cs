@@ -21,14 +21,15 @@ public class Leaderboard : MonoBehaviour
 	private LeaderboardStates currentState; 
 
 	[SerializeField]
-	private Dictionary<string, int> leaderboard = new Dictionary<string, int>();
+	private Dictionary<string, int> _leaderboard = new Dictionary<string, int>();
 	[HideInInspector]
-	public Dictionary<string, int> localLeaderboard = new Dictionary<string, int>();
+	public Dictionary<string, int> _localLeaderboard = new Dictionary<string, int>();
 	[SerializeField]
-	private Dictionary<string, int> onlineLeaderboard = new Dictionary<string, int>();
+	private Dictionary<string, int> _onlineLeaderboard = new Dictionary<string, int>();
 
 	private bool init = false;
 
+	private TextMeshProUGUI headerTitle;
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
 	private Button submitEntry_Button;
@@ -59,6 +60,8 @@ public class Leaderboard : MonoBehaviour
 		playerScore_entries_UI = new List<GameObject>();
 		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
 		playerScoreField = GameObject.Find("InputField_PlayerScore");
+		headerTitle = GameObject.Find("Text_HeaderTitle").GetComponent<TextMeshProUGUI>();
+
 		//submitEntry_Button = GameObject.Find("").GetComponent<Button>();
 
 		submitEntryPrompt = GameObject.Find("Button_SubmitEntry");
@@ -82,11 +85,11 @@ public class Leaderboard : MonoBehaviour
 		// ** **\\
 
 		//every thing here seems redundant and i dont think it activates
-		if (localLeaderboard.Count > 0)
+		if (_localLeaderboard.Count > 0)
 		{
 			// tmp list to sort elements in dictionary by value (aka: scpre)
 			List<KeyValuePair<string, int>> reorderedList =
-				ReorderPlayerRank_HigestToLowest(localLeaderboard.ToList());
+				SortList_HigestToLowest(_localLeaderboard.ToList());
 
 			int i = 0;
 			foreach (KeyValuePair<string, int> pair in reorderedList)
@@ -104,88 +107,57 @@ public class Leaderboard : MonoBehaviour
 	//this is an outside caller
 	public void SetLeaderboardData(List<string> keys, List<int> values)
 	{
-		leaderboard.Clear();
+		_leaderboard.Clear();
 		ResetLeaderboard();	
 
 		GameObject tmpEntry;
 
 		for (int i = 0; i < keys.Count; i++)
 		{
-			if (leaderboard.ContainsKey(keys[i]))
+			if (_leaderboard.ContainsKey(keys[i]))
 				continue;
 
-			leaderboard.Add(keys[i], values[i]);
+			_leaderboard.Add(keys[i], values[i]);
 			tmpEntry = playerScore_entries_UI[i];
 			SetEntryDataToTextField(keys[i], values[i], i, tmpEntry);
 			playerScore_entries_UI.Add(tmpEntry);
 		}
-
-
-		List<KeyValuePair<string, int>> reorderedList =
-			ReorderPlayerRank_HigestToLowest(leaderboard.ToList());
-		int f = 0;
-		foreach (KeyValuePair<string, int> pair in reorderedList)
-		{
-			tmpEntry = playerScore_entries_UI[f];
-			// set text fields 
-			SetEntryDataToTextField(pair.Key, pair.Value, f, tmpEntry);
-			f++;
-		}
+		SortLeaderboard(_leaderboard);
 	}
 
 
 	public List<KeyValuePair<string, int>> GetLeaderboardList()
 	{
-		return leaderboard.ToList();
+		return _leaderboard.ToList();
 	}
 	public void SetLocalLeaderboard(List<KeyValuePair<string, int>> list)
 	{
-		localLeaderboard.Clear();
+		_localLeaderboard.Clear();
 
 		foreach (var item in list)
-			localLeaderboard.Add(item.Key, item.Value);
+			_localLeaderboard.Add(item.Key, item.Value);
 	}
 
 	public void AddNewEntryToLeaderboard()
 	{
-		// destroy previous rank entries lif new score is added to leaderboard
-		if (playerScore_entries_UI.Count > 0)
-			DestroyLeaderboard();
-
-		CreateNewLeaderboard();
-				
 		KeyValuePair<string, int> tmp = GetTextField();
-	
+
 		if (!IsEntryValid(tmp.Key, tmp.Value))
 			return;
 
-		leaderboard.Add(tmp.Key, tmp.Value);
+		ResetLeaderboard();
+				
+		_leaderboard.Add(tmp.Key, tmp.Value);
 
-		// tmp list to sort elements in dictionary by value (aka: score)
-		List<KeyValuePair<string, int>> reorderedList =
-			ReorderPlayerRank_HigestToLowest(leaderboard.ToList());
+		SortLeaderboard(_leaderboard);
 
-		// reorder entires
-		int i = 0;
-		GameObject tmpEntry;
-
-		foreach (KeyValuePair<string, int> pair in reorderedList)
-		{
-			if (i >= LeaderboardListSizeMAX) {
-				for (int k = reorderedList.Count - 1; k >= LeaderboardListSizeMAX; k--)
-					reorderedList.Remove(reorderedList[k]);
-
-				SetLocalLeaderboard(reorderedList);
-				return;
-			}
-
-			tmpEntry = playerScore_entries_UI[i];
-			SetEntryDataToTextField(pair.Key, pair.Value, i, tmpEntry);
-			i++;
-		}
 
         if (currentState == LeaderboardStates.local)
 			SaveSystem.instance.SaveData();
+
+
+		if (currentState == LeaderboardStates.online)
+			SendLeaderboardToDreamLo();
 
 		// ** **\\
 		// check online leaderboard and if new score entry is higher 
@@ -193,8 +165,6 @@ public class Leaderboard : MonoBehaviour
 		//SendLeaderboardToDreamLo();
 		// ** **\\
 	}
-
-
 
 	private void SetEntryDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
 	{
@@ -228,24 +198,50 @@ public class Leaderboard : MonoBehaviour
 	// check if there's duplicate scores/names 
 	private bool IsEntryValid(string _name, int _score)
     {
-		if (leaderboard.ContainsKey(_name) &&
-            leaderboard.ContainsValue(_score))
+		if (_leaderboard.ContainsKey(_name) &&
+            _leaderboard.ContainsValue(_score))
         {
 			Debug.Log("Entry with similar name and score already exists");
 			Debug.Log("Please change your name");
 			return false;
 		}
-
 		if (_name == "" || _score == 0)
         {
 			Debug.Log("nothing assigned in text field");
 			return false;
 		}
-			
 		return true; 
     }
-	
-	// creeate new blank leaderboard with default rank data
+
+	private void SortLeaderboard(Dictionary<string, int> leaderboard)
+    {
+		// tmp list to sort elements in dictionary by value (aka: score)
+		List<KeyValuePair<string, int>> reorderedList =
+			SortList_HigestToLowest(leaderboard.ToList());
+
+		// reorder entires
+		int i = 0;
+		GameObject tmpEntry;
+
+		foreach (KeyValuePair<string, int> pair in reorderedList)
+		{
+			// remove any score entries pass the leaderboard size limit
+			if (i >= LeaderboardListSizeMAX)
+			{
+				for (int k = reorderedList.Count - 1; k >= LeaderboardListSizeMAX; k--)
+					reorderedList.Remove(reorderedList[k]);
+
+				SetLocalLeaderboard(reorderedList);
+				break;
+			}
+
+			tmpEntry = playerScore_entries_UI[i];
+			SetEntryDataToTextField(pair.Key, pair.Value, i, tmpEntry);
+			i++;
+		}
+	}
+
+	// create new blank leaderboard with default entry data
 	private void CreateNewLeaderboard()
 	{
 		GameObject tmpEntry;
@@ -256,14 +252,12 @@ public class Leaderboard : MonoBehaviour
 			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
 		}
 	}
-
 	private void DestroyLeaderboard()
 	{
 		foreach (GameObject item in playerScore_entries_UI)
 			Destroy(item.gameObject);
 		playerScore_entries_UI.Clear();
 	}
-
 	public void ResetLeaderboard()
     {
 		DestroyLeaderboard();
@@ -278,16 +272,19 @@ public class Leaderboard : MonoBehaviour
             case LeaderboardStates.entry:
 				currentState = LeaderboardStates.entry;
                 break;
+
             case LeaderboardStates.local:
 				currentState = LeaderboardStates.local;
+				headerTitle.text = "Local Leaderboard";
 				SaveSystem.instance.LoadData();
-				//leaderboard = localLeaderboard;
+				_leaderboard = _localLeaderboard;
                 break;
 
             case LeaderboardStates.online:
 				currentState = LeaderboardStates.online;
+				headerTitle.text = "Online Leaderboard";
 				GetLeaderboardDataFromDreamLo();
-				leaderboard = onlineLeaderboard;
+				_leaderboard = _onlineLeaderboard;
 				break;
 
             default:
@@ -310,14 +307,11 @@ public class Leaderboard : MonoBehaviour
 		}
 	}
 
-
-
 	[ContextMenu("Open Local Leaderboard")]
 	private void OpenLocalLeaderboard()
 	{
 		EnterState(LeaderboardStates.local);
 	}
-
 	[ContextMenu("Open Online Leaderboard")]
 	private void OpenOnlineLeaderboard()
 	{
@@ -328,7 +322,6 @@ public class Leaderboard : MonoBehaviour
 	{
 		EnterState(LeaderboardStates.entry);
 	}
-
 
 	// triggered by UI button
 	public void SendLeaderboardToDreamLo()
@@ -358,7 +351,7 @@ public class Leaderboard : MonoBehaviour
 
 	#region sorting functions
 	// sort leaderboard by highest to lowest
-	private List<KeyValuePair<string, int>> ReorderPlayerRank_HigestToLowest(List<KeyValuePair<string, int>> data)
+	private List<KeyValuePair<string, int>> SortList_HigestToLowest(List<KeyValuePair<string, int>> data)
     {
 		// tmp list to sort elements in dictionary by value (aka: scpre)
 		List<KeyValuePair<string, int>> tmplist = data.ToList();

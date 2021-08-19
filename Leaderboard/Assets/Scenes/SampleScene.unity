@@ -453,7 +453,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 13990f257cfd69549a1a8bde79192325, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  score: 10
+  score: 2500
 --- !u!1001 &1252968648
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -638,7 +638,7 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 90228405, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
       propertyPath: m_AnchoredPosition.x
-      value: -92
+      value: -1839
       objectReference: {fileID: 0}
     - target: {fileID: 104765367, guid: 55a7e8c7b7193134ab1888beeec7647b, type: 3}
       propertyPath: m_OnClick.m_PersistentCalls.m_Calls.Array.data[0].m_Target
