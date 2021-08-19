@@ -30,7 +30,7 @@ public class PlayfabManager : MonoBehaviour
 
     void OnLoginSuccess(LoginResult result)
     {
-        Debug.Log("successful login/account create");
+        Debug.Log("successful login/account create", this);
         string name = null;
         if(result.InfoResultPayload.PlayerProfile != null)
             name = result.InfoResultPayload.PlayerProfile.DisplayName;

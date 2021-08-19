@@ -6,12 +6,15 @@ using UnityEngine;
 [Serializable]
 public class SaveSystem : MonoBehaviour
 {
+    public static SaveSystem instance;
+
     [SerializeField]
     private SavaData saveData;
-    
-    // Start is called before the first frame update
+
     void Start()
     {
+        if (instance == null)
+            instance = this;
         saveData = new SavaData();
     }
     
