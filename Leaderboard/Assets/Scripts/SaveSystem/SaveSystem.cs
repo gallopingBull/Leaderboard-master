@@ -16,15 +16,16 @@ public class SaveSystem : MonoBehaviour
         if (instance == null)
             instance = this;
         saveData = new SavaData();
+
+        LoadData();
     }
     
-    public void LoadData()
+    private void LoadData()
     {
         if (PlayerPrefs.HasKey("SaveData"))
         {
             string json = PlayerPrefs.GetString("SaveData");
             saveData = JsonUtility.FromJson<SavaData>(json);
-            Leaderboard.Instance.SetLeaderboardData(saveData.keys, saveData.values);
         }
     }
 
@@ -46,6 +47,17 @@ public class SaveSystem : MonoBehaviour
 
         PlayerPrefs.SetString("SaveData", json);
         PlayerPrefs.Save();        
+    }
+
+
+    public Dictionary<string, int> GetLocalLeaderboard()
+    {
+        Dictionary<string, int> tmpDict = new Dictionary<string, int>();
+        for (int i = 0; i < saveData.keys.Count; i++)
+        {
+            tmpDict.Add(saveData.keys[i], saveData.values[i]);
+        }
+        return tmpDict;
     }
 }
 

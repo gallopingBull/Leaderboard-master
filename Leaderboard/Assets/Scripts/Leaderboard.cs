@@ -73,34 +73,20 @@ public class Leaderboard : MonoBehaviour
 			CreateNewLeaderboard();
 
 		// set data in leaderboard fields
-		InitLeadboards();
+		Invoke("InitLeaderboard", 1f);
 	}
 
-	private void InitLeadboards()
+	private void InitLeaderboard()
 	{
+
+		// start with local leaderboard by default
+		EnterState(LeaderboardStates.local);
 		// ** **\\
 		// localLeaderboard =  SaveSystem.instance.LoadData();
 		// onlineLeaderBoard = Get Leaderboard from DreamLo
 		// copy player score data into list
 		// ** **\\
 
-		//every thing here seems redundant and i dont think it activates
-		if (_localLeaderboard.Count > 0)
-		{
-			// tmp list to sort elements in dictionary by value (aka: scpre)
-			List<KeyValuePair<string, int>> reorderedList =
-				SortList_HigestToLowest(_localLeaderboard.ToList());
-
-			int i = 0;
-			foreach (KeyValuePair<string, int> pair in reorderedList)
-			{
-				if (i == reorderedList.Count)
-					return;
-				SetEntryDataToTextField(pair.Key, pair.Value, i, playerScore_entries_UI[i]); // do not like the way im sending
-																							// the object reference here
-				i++;
-			}
-		}
 		//init = true;
 	}
 
@@ -124,20 +110,19 @@ public class Leaderboard : MonoBehaviour
 		}
 		SortLeaderboard(_leaderboard);
 	}
+	public void SetLocalLeaderboard(List<KeyValuePair<string, int>> list)
+	{
+		_leaderboard.Clear();
 
+		foreach (var item in list)
+			_leaderboard.Add(item.Key, item.Value);
+	}
 
 	public List<KeyValuePair<string, int>> GetLeaderboardList()
 	{
 		return _leaderboard.ToList();
 	}
-	public void SetLocalLeaderboard(List<KeyValuePair<string, int>> list)
-	{
-		_localLeaderboard.Clear();
-
-		foreach (var item in list)
-			_localLeaderboard.Add(item.Key, item.Value);
-	}
-
+	
 	public void AddNewEntryToLeaderboard()
 	{
 		KeyValuePair<string, int> tmp = GetTextField();
@@ -157,7 +142,7 @@ public class Leaderboard : MonoBehaviour
 
 
 		if (currentState == LeaderboardStates.online)
-			SendLeaderboardToDreamLo();
+			SendLeaderboardDataToDreamLo();
 
 		// ** **\\
 		// check online leaderboard and if new score entry is higher 
@@ -276,15 +261,19 @@ public class Leaderboard : MonoBehaviour
             case LeaderboardStates.local:
 				currentState = LeaderboardStates.local;
 				headerTitle.text = "Local Leaderboard";
-				SaveSystem.instance.LoadData();
+				_localLeaderboard = GetLocalLeaderboardData();
 				_leaderboard = _localLeaderboard;
-                break;
+				SetLeaderboardData(_leaderboard.Keys.ToList(), _leaderboard.Values.ToList());
+
+
+				break;
 
             case LeaderboardStates.online:
 				currentState = LeaderboardStates.online;
 				headerTitle.text = "Online Leaderboard";
-				GetLeaderboardDataFromDreamLo();
+				_onlineLeaderboard = GetLeaderboardDataFromDreamLo();
 				_leaderboard = _onlineLeaderboard;
+				SetLeaderboardData(_leaderboard.Keys.ToList(), _leaderboard.Values.ToList());
 				break;
 
             default:
@@ -323,29 +312,34 @@ public class Leaderboard : MonoBehaviour
 		EnterState(LeaderboardStates.entry);
 	}
 
+	private Dictionary<string, int> GetLocalLeaderboardData()
+    {
+		return SaveSystem.instance.GetLocalLeaderboard();
+	}
+
+
 	// triggered by UI button
-	public void SendLeaderboardToDreamLo()
+	public void SendLeaderboardDataToDreamLo()
 	{
 		for (int i = 0; i < GetLeaderboardList().Count; i++)
 			dreamLoManager.AddScore(GetLeaderboardList()[i].Key, GetLeaderboardList()[i].Value);
 	}
 
-	public void GetLeaderboardDataFromDreamLo()
+	public Dictionary<string, int> GetLeaderboardDataFromDreamLo()
 	{
 		List<dreamloLeaderBoard.Score> scoreList = dreamLoManager.ToListHighToLow();
+		// might delete this condition
+		// i'll have a pre condition to check if player is online and
+		// whether they can access the online leaderboard
 		if (scoreList == null)
 			print("(loading...)");
-		else
-		{
-			List<string> tmpKeys = new List<string>();
-			List<int> tmpValues = new List<int>();
-			foreach (var item in scoreList)
-			{
-				tmpKeys.Add(item.playerName);
-				tmpValues.Add(item.score);
-			}
-			SetLeaderboardData(tmpKeys, tmpValues);
-		}
+		
+		Dictionary<string, int> tmpDic = new Dictionary<string, int>();
+
+		for (int i = 0; i < scoreList.Count; i++)
+			tmpDic.Add(scoreList[i].playerName, scoreList[i].score);
+
+		return tmpDic;
 	}
 
 

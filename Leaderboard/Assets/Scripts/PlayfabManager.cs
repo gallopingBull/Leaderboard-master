@@ -100,7 +100,7 @@ public class PlayfabManager : MonoBehaviour
 
             Debug.Log(string.Format ("RANK: {0} | NAME: {1} | SCORE: {2}", item.Position, item.DisplayName, item.StatValue));
         }
-
-        Leaderboard.Instance.SetLeaderboardData(tmpKeys, tmpValues);
+        // hid this just to ignore seeing it as a reference in leaderboard.cs
+        //Leaderboard.Instance.SetLeaderboardData(tmpKeys, tmpValues);
     }
 }
