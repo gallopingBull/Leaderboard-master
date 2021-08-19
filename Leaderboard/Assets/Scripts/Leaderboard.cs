@@ -34,7 +34,7 @@ public class Leaderboard : MonoBehaviour
 	private Button submitEntry_Button;
 	
 	private GameObject submitEntryPrompt;
-	private Transform entryParent;
+	private Transform scoreEntryParent;
 	
 	[SerializeField]
 	private GameObject player_Score_UITemplate_Prefab; //ref to instantiate
@@ -55,7 +55,7 @@ public class Leaderboard : MonoBehaviour
 
 	private void Start()
 	{
-		entryParent = GameObject.Find("Panel_List").transform;
+		scoreEntryParent = GameObject.Find("Panel_List").transform;
 		playerScore_entries_UI = new List<GameObject>();
 		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
 		playerScoreField = GameObject.Find("InputField_PlayerScore");
@@ -251,8 +251,8 @@ public class Leaderboard : MonoBehaviour
 		GameObject tmpEntry;
 		for (int i = 0; i < LeaderboardListSizeMAX; i++)
 		{
-			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, entryParent.position, entryParent.rotation,
-			entryParent);
+			tmpEntry = Instantiate(player_Score_UITemplate_Prefab, scoreEntryParent.position, scoreEntryParent.rotation,
+			scoreEntryParent);
 			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
 		}
 	}
@@ -270,8 +270,6 @@ public class Leaderboard : MonoBehaviour
 		CreateNewLeaderboard();
     }
 	
-
-
 	public void EnterState(LeaderboardStates _state)
     {
 		ExitState(currentState);
