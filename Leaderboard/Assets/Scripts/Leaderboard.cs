@@ -11,14 +11,16 @@ public class Leaderboard : MonoBehaviour
 	[SerializeField]
 	private static Leaderboard instance;
 
-	[SerializeField]
+	[SerializeField]	
 	private bool EnableTesting = false; 
 	public enum LeaderboardStates
 	{
 		entry, local, online
 	}
 
-	private LeaderboardStates currentState; 
+	private LeaderboardStates currentState;
+
+	private bool isOnline = true;
 
 	[SerializeField]
 	private Dictionary<string, int> _leaderboard = new Dictionary<string, int>();
@@ -29,11 +31,13 @@ public class Leaderboard : MonoBehaviour
 
 	private bool init = false;
 
-	private TextMeshProUGUI headerTitle;
+	private TextMeshProUGUI headerTitle; 
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
 	private Button submitEntry_Button;
-	
+
+
+	private TextMeshProUGUI PlayerScore_Text;
 	private GameObject submitEntryPrompt;
 	private Transform scoreEntryParent;
 	
@@ -56,38 +60,38 @@ public class Leaderboard : MonoBehaviour
 
 	private void Start()
 	{
-		scoreEntryParent = GameObject.Find("Panel_List").transform;
-		playerScore_entries_UI = new List<GameObject>();
-		playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
-		playerScoreField = GameObject.Find("InputField_PlayerScore");
-		headerTitle = GameObject.Find("Text_HeaderTitle").GetComponent<TextMeshProUGUI>();
-
-		//submitEntry_Button = GameObject.Find("").GetComponent<Button>();
-
-		submitEntryPrompt = GameObject.Find("Button_SubmitEntry");
-		
-		dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
-        // if no leaderboard has been created
-        // creeate new leaderboard with blank values
-        if (!init)
-			CreateNewLeaderboard();
-
 		// set data in leaderboard fields
 		Invoke("InitLeaderboard", 1f);
 	}
 
 	private void InitLeaderboard()
 	{
+        if (!init)
+        {
+			scoreEntryParent = GameObject.Find("Panel_List").transform;
+			playerScore_entries_UI = new List<GameObject>();
+			playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
+			
+			
+			if (EnableTesting)
+				playerScoreField = GameObject.Find("InputField_PlayerScore");
+
+
+			headerTitle = GameObject.Find("Text_HeaderTitle").GetComponent<TextMeshProUGUI>();
+			PlayerScore_Text = GameObject.Find("Text_NewScore").GetComponent<TextMeshProUGUI>();
+			
+			submitEntryPrompt = GameObject.Find("Panel_InputPlayerName");
+			submitEntryPrompt.SetActive(false);
+
+
+			dreamLoManager = dreamloLeaderBoard.GetSceneDreamloLeaderboard();
+			init = true;
+		}
+
+		CreateNewLeaderboard();
 
 		// start with local leaderboard by default
 		EnterState(LeaderboardStates.local);
-		// ** **\\
-		// localLeaderboard =  SaveSystem.instance.LoadData();
-		// onlineLeaderBoard = Get Leaderboard from DreamLo
-		// copy player score data into list
-		// ** **\\
-
-		//init = true;
 	}
 
 	//this is an outside caller
@@ -141,14 +145,24 @@ public class Leaderboard : MonoBehaviour
 			SaveSystem.instance.SaveData();
 
 
+        // ** **\\
+        // check online leaderboard and if new score entry is higher 
+        // than any of the top ten, add new entry in there as well
+        //SendLeaderboardToDreamLo();
+        // ** **\\
+		/*
+        if (CheckOnlineConnection()) {
+			EnterState(LeaderboardStates.online);
+			AddNewEntryToLeaderboard();
+			return;
+		}*/
+
 		if (currentState == LeaderboardStates.online)
 			SendLeaderboardDataToDreamLo();
 
-		// ** **\\
-		// check online leaderboard and if new score entry is higher 
-		// than any of the top ten, add new entry in there as well
-		//SendLeaderboardToDreamLo();
-		// ** **\\
+		DisablePlayerNameEntryPrompt();
+
+		
 	}
 
 	private void SetEntryDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
@@ -255,7 +269,9 @@ public class Leaderboard : MonoBehaviour
         switch (_state)	
         {
             case LeaderboardStates.entry:
+				submitEntryPrompt.SetActive(true);
 				currentState = LeaderboardStates.entry;
+				PlayerScore_Text.text = GameManager.instance.score.ToString(); 
                 break;
 
             case LeaderboardStates.local:
@@ -286,6 +302,7 @@ public class Leaderboard : MonoBehaviour
 		switch (_state)
 		{
 			case LeaderboardStates.entry:
+				submitEntryPrompt.SetActive(false);
 				break;
 			case LeaderboardStates.local:
 				break;
@@ -311,6 +328,27 @@ public class Leaderboard : MonoBehaviour
 	{
 		EnterState(LeaderboardStates.entry);
 	}
+	private void DisablePlayerNameEntryPrompt()
+	{
+		ExitState(LeaderboardStates.entry);
+	}
+
+	private bool CheckOnlineConnection()
+    {
+		if (Application.internetReachability != NetworkReachability.NotReachable)
+		{
+			//Connection OK
+			print("connection Ok");
+			return true;
+		}
+		else
+		{
+			print("connection false");
+			//NoInternetConnection
+			return false;
+		}
+
+    }
 
 	private Dictionary<string, int> GetLocalLeaderboardData()
     {

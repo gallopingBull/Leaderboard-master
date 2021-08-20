@@ -1,5 +1,6 @@
+// simple save system that saves/loads leaderboard data
+
 using System;
-using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 
@@ -49,14 +50,12 @@ public class SaveSystem : MonoBehaviour
         PlayerPrefs.Save();        
     }
 
-
+    // leaderboard.cs instance calls this
     public Dictionary<string, int> GetLocalLeaderboard()
     {
         Dictionary<string, int> tmpDict = new Dictionary<string, int>();
         for (int i = 0; i < saveData.keys.Count; i++)
-        {
             tmpDict.Add(saveData.keys[i], saveData.values[i]);
-        }
         return tmpDict;
     }
 }

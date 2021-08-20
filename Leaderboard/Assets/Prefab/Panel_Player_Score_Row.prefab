@@ -164,7 +164,7 @@ GameObject:
   - component: {fileID: 2299301944730048074}
   - component: {fileID: 6399203902081709342}
   m_Layer: 5
-  m_Name: Text (TMP)
+  m_Name: Text _PlayerRank
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -553,7 +553,7 @@ GameObject:
   - component: {fileID: 8775304688883992017}
   - component: {fileID: 5305928372510657503}
   m_Layer: 5
-  m_Name: Text_PlayerName
+  m_Name: Text_PlayerScore
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
