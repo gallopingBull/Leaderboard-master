@@ -158,6 +158,7 @@ public class Leaderboard : MonoBehaviour
 			return;
 		}
 
+
 		if (currentState == LeaderboardStates.online)
 			SendLeaderboardDataToDreamLo();
 
