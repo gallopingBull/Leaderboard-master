@@ -141,7 +141,8 @@ public class Leaderboard : MonoBehaviour
 		SortLeaderboard(_leaderboard);
 
 
-        if (currentState == LeaderboardStates.local)
+        if (currentState == LeaderboardStates.local ||
+			currentState == LeaderboardStates.entry)
 			SaveSystem.instance.SaveData();
 
 
@@ -150,12 +151,12 @@ public class Leaderboard : MonoBehaviour
         // than any of the top ten, add new entry in there as well
         //SendLeaderboardToDreamLo();
         // ** **\\
-		/*
-        if (CheckOnlineConnection()) {
+
+        if (CheckOnlineConnection() && (currentState == LeaderboardStates.local || currentState == LeaderboardStates.entry)) {
 			EnterState(LeaderboardStates.online);
 			AddNewEntryToLeaderboard();
 			return;
-		}*/
+		}
 
 		if (currentState == LeaderboardStates.online)
 			SendLeaderboardDataToDreamLo();
