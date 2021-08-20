@@ -8,25 +8,18 @@ using UnityEngine.UI;
 [Serializable]
 public class Leaderboard : MonoBehaviour
 {
-	[SerializeField]
 	private static Leaderboard instance;
 
-	[SerializeField]	
 	private bool EnableTesting = false; 
-	public enum LeaderboardStates
+	private enum LeaderboardStates
 	{
 		entry, local, online
 	}
 
 	private LeaderboardStates currentState;
 
-	private bool isOnline = true;
-
-	[SerializeField]
 	private Dictionary<string, int> _leaderboard = new Dictionary<string, int>();
-	[HideInInspector]
-	public Dictionary<string, int> _localLeaderboard = new Dictionary<string, int>();
-	[SerializeField]
+	private Dictionary<string, int> _localLeaderboard = new Dictionary<string, int>();
 	private Dictionary<string, int> _onlineLeaderboard = new Dictionary<string, int>();
 
 	private bool init = false;
@@ -34,19 +27,17 @@ public class Leaderboard : MonoBehaviour
 	private TextMeshProUGUI headerTitle; 
 	public TextMeshProUGUI playerNameField;
 	public GameObject playerScoreField;
-	private Button submitEntry_Button;
-
 
 	private TextMeshProUGUI PlayerScore_Text;
 	private GameObject submitEntryPrompt;
 	private Transform scoreEntryParent;
-	
-	[SerializeField]
-	private GameObject player_Score_UITemplate_Prefab; //ref to instantiate
+
+	// player score entry prefabs used to instantiate in leaderboard
+	[SerializeField] GameObject player_Score_UITemplate_Prefab; 
 	private List<GameObject> playerScore_entries_UI;
 
-	[SerializeField]
-	private int LeaderboardListSizeMAX = 10;
+	// max score entries allowed in leaderboard
+	[SerializeField] int LeaderboardListSizeMAX = 10;
 
 	private dreamloLeaderBoard dreamLoManager;
 
@@ -143,28 +134,22 @@ public class Leaderboard : MonoBehaviour
 
         if (currentState == LeaderboardStates.local ||
 			currentState == LeaderboardStates.entry)
+        {
 			SaveSystem.instance.SaveData();
 
-
-        // ** **\\
-        // check online leaderboard and if new score entry is higher 
-        // than any of the top ten, add new entry in there as well
-        //SendLeaderboardToDreamLo();
-        // ** **\\
-
-        if (CheckOnlineConnection() && (currentState == LeaderboardStates.local || currentState == LeaderboardStates.entry)) {
-			EnterState(LeaderboardStates.online);
-			AddNewEntryToLeaderboard();
-			return;
+			// check if player is online to be able to add new entry to online leaderboard
+			if (CheckOnlineConnection())
+            {
+				EnterState(LeaderboardStates.online);
+				AddNewEntryToLeaderboard();
+				return;
+			}
 		}
-
-
+			
 		if (currentState == LeaderboardStates.online)
 			SendLeaderboardDataToDreamLo();
 
-		DisablePlayerNameEntryPrompt();
-
-		
+		HidePlayerNameEntryPrompt();
 	}
 
 	private void SetEntryDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
@@ -178,7 +163,6 @@ public class Leaderboard : MonoBehaviour
 		string _score = "";
 
 		int score = 0;
-
 
 		_name = playerNameField.text;
 
@@ -265,7 +249,7 @@ public class Leaderboard : MonoBehaviour
 		CreateNewLeaderboard();
     }
 	
-	public void EnterState(LeaderboardStates _state)
+	private void EnterState(LeaderboardStates _state)
     {
 		ExitState(currentState);
         switch (_state)	
@@ -330,7 +314,7 @@ public class Leaderboard : MonoBehaviour
 	{
 		EnterState(LeaderboardStates.entry);
 	}
-	private void DisablePlayerNameEntryPrompt()
+	private void HidePlayerNameEntryPrompt()
 	{
 		ExitState(LeaderboardStates.entry);
 	}
@@ -338,19 +322,10 @@ public class Leaderboard : MonoBehaviour
 	private bool CheckOnlineConnection()
     {
 		if (Application.internetReachability != NetworkReachability.NotReachable)
-		{
-			//Connection OK
-			print("connection Ok");
-			return true;
-		}
+			return true; // internet connection successful
 		else
-		{
-			print("connection false");
-			//NoInternetConnection
-			return false;
-		}
-
-    }
+			return false; // internet connection failed
+	}
 
 	private Dictionary<string, int> GetLocalLeaderboardData()
     {
@@ -384,7 +359,7 @@ public class Leaderboard : MonoBehaviour
 
 
 	#region sorting functions
-	// sort leaderboard by highest to lowest
+	// sort leaderboard by highest to lowest score
 	private List<KeyValuePair<string, int>> SortList_HigestToLowest(List<KeyValuePair<string, int>> data)
     {
 		// tmp list to sort elements in dictionary by value (aka: scpre)

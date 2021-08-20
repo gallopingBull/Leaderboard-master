@@ -8,8 +8,6 @@ using UnityEngine;
 public class SaveSystem : MonoBehaviour
 {
     public static SaveSystem instance;
-
-    [SerializeField]
     private SavaData saveData;
 
     void Start()
@@ -50,7 +48,7 @@ public class SaveSystem : MonoBehaviour
         PlayerPrefs.Save();        
     }
 
-    // leaderboard.cs instance calls this
+    // leaderboard.cs instance invokes this
     public Dictionary<string, int> GetLocalLeaderboard()
     {
         Dictionary<string, int> tmpDict = new Dictionary<string, int>();
