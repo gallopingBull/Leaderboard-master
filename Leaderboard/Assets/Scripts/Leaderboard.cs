@@ -10,6 +10,8 @@ public class Leaderboard : MonoBehaviour
 {
 	private static Leaderboard instance;
 
+	private GameObject leaderboardUI_GO; 
+
 	private bool EnableTesting = false; 
 	private enum LeaderboardStates
 	{
@@ -59,6 +61,7 @@ public class Leaderboard : MonoBehaviour
 	{
         if (!init)
         {
+			leaderboardUI_GO = GameObject.Find("Leaderboard_UI");
 			scoreEntryParent = GameObject.Find("Panel_List").transform;
 			playerScore_entries_UI = new List<GameObject>();
 			playerNameField = GameObject.Find("Text_PlayerName").GetComponent<TextMeshProUGUI>();
