@@ -5,16 +5,16 @@ using System.Collections.Generic;
 using UnityEngine;
 
 [Serializable]
-public class SaveSystem : MonoBehaviour
+public class Leaderboard_SaveSystem : MonoBehaviour
 {
-    public static SaveSystem instance;
-    private SavaData saveData;
+    public static Leaderboard_SaveSystem instance;
+    private Leaderboard_SavaData saveData;
 
     void Start()
     {
         if (instance == null)
             instance = this;
-        saveData = new SavaData();
+        saveData = new Leaderboard_SavaData();
 
         LoadData();
     }
@@ -24,7 +24,7 @@ public class SaveSystem : MonoBehaviour
         if (PlayerPrefs.HasKey("SaveData"))
         {
             string json = PlayerPrefs.GetString("SaveData");
-            saveData = JsonUtility.FromJson<SavaData>(json);
+            saveData = JsonUtility.FromJson<Leaderboard_SavaData>(json);
         }
     }
 

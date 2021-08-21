@@ -143,7 +143,7 @@ public class Leaderboard : MonoBehaviour
 
         if (currentState == LeaderboardStates.local)
         {
-			SaveSystem.instance.SaveData();
+			Leaderboard_SaveSystem.instance.SaveData();
 
 			// check if player is online to be able to add new entry to online leaderboard
 			if (CheckOnlineConnection())
@@ -180,7 +180,7 @@ public class Leaderboard : MonoBehaviour
 			score = int.Parse(_score);
         }
         else
-			score = GameManager.instance.SendScore();
+			score = Leaderboard_GameManager.instance.SendScore();
 
 
 
@@ -302,7 +302,7 @@ public class Leaderboard : MonoBehaviour
 	private void OpenPlayerNameEntryPrompt()
 	{
 		submitEntryPrompt.SetActive(true);
-		PlayerScore_Text.text = GameManager.instance.score.ToString();
+		PlayerScore_Text.text = Leaderboard_GameManager.instance.score.ToString();
 	}
 	private void ClosePlayerNameEntryPrompt()
 	{
@@ -320,7 +320,7 @@ public class Leaderboard : MonoBehaviour
 
 	private Dictionary<string, int> GetLocalLeaderboardData()
     {
-		return SaveSystem.instance.GetLocalLeaderboard();
+		return Leaderboard_SaveSystem.instance.GetLocalLeaderboard();
 	}
 
 	public void SendLeaderboardDataToDreamLo()

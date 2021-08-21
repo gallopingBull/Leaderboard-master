@@ -1,8 +1,8 @@
 using UnityEngine;
 
-public class GameManager : MonoBehaviour, ILeaderboard
+public class Leaderboard_GameManager : MonoBehaviour, ILeaderboard
 {
-    public static GameManager instance; 
+    public static Leaderboard_GameManager instance; 
     public int score = 100; 
     
     void Start()
