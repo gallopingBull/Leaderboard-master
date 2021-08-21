@@ -15,7 +15,7 @@ public class Leaderboard : MonoBehaviour
 	private bool EnableTesting = false; 
 	private enum LeaderboardStates
 	{
-		entry, local, online
+		local, online
 	}
 
 	private LeaderboardStates currentState;
@@ -54,7 +54,7 @@ public class Leaderboard : MonoBehaviour
 	private void Start()
 	{
 		// set data in leaderboard fields
-		Invoke("InitLeaderboard", 1f);
+		Invoke("InitLeaderboard", .1f);
 	}
 
 	private void InitLeaderboard()
@@ -86,10 +86,23 @@ public class Leaderboard : MonoBehaviour
 
 		// start with local leaderboard by default
 		EnterState(LeaderboardStates.local);
+		CloseLeaderboard();
 	}
 
-	//this is an outside caller
-	public void SetLeaderboardData(List<string> keys, List<int> values)
+
+	[ContextMenu("Open Leaderboard")]
+	public void OpenLeaderboard()
+	{
+		leaderboardUI_GO.SetActive(true);
+		GoToLocalLeaderboard();
+	}
+	[ContextMenu("Close Leaderboard")]
+	public void CloseLeaderboard()
+	{
+		leaderboardUI_GO.SetActive(false);
+	}
+
+	private void SetLeaderboardData(List<string> keys, List<int> values)
 	{
 		_leaderboard.Clear();
 		ResetLeaderboard();	
@@ -107,13 +120,6 @@ public class Leaderboard : MonoBehaviour
 			playerScore_entries_UI.Add(tmpEntry);
 		}
 		SortLeaderboard(_leaderboard);
-	}
-	public void SetLocalLeaderboard(List<KeyValuePair<string, int>> list)
-	{
-		_leaderboard.Clear();
-
-		foreach (var item in list)
-			_leaderboard.Add(item.Key, item.Value);
 	}
 
 	public List<KeyValuePair<string, int>> GetLeaderboardList()
@@ -135,8 +141,7 @@ public class Leaderboard : MonoBehaviour
 		SortLeaderboard(_leaderboard);
 
 
-        if (currentState == LeaderboardStates.local ||
-			currentState == LeaderboardStates.entry)
+        if (currentState == LeaderboardStates.local)
         {
 			SaveSystem.instance.SaveData();
 
@@ -152,7 +157,7 @@ public class Leaderboard : MonoBehaviour
 		if (currentState == LeaderboardStates.online)
 			SendLeaderboardDataToDreamLo();
 
-		HidePlayerNameEntryPrompt();
+		ClosePlayerNameEntryPrompt();
 	}
 
 	private void SetEntryDataToTextField(string key, int value, int index, GameObject rank_UI_Panel)
@@ -218,8 +223,6 @@ public class Leaderboard : MonoBehaviour
 			{
 				for (int k = reorderedList.Count - 1; k >= LeaderboardListSizeMAX; k--)
 					reorderedList.Remove(reorderedList[k]);
-
-				SetLocalLeaderboard(reorderedList);
 				break;
 			}
 
@@ -227,6 +230,11 @@ public class Leaderboard : MonoBehaviour
 			SetEntryDataToTextField(pair.Key, pair.Value, i, tmpEntry);
 			i++;
 		}
+
+		_leaderboard.Clear();
+
+		foreach (var item in reorderedList)
+			_leaderboard.Add(item.Key, item.Value);
 	}
 
 	// create new blank leaderboard with default entry data
@@ -254,23 +262,14 @@ public class Leaderboard : MonoBehaviour
 	
 	private void EnterState(LeaderboardStates _state)
     {
-		ExitState(currentState);
         switch (_state)	
         {
-            case LeaderboardStates.entry:
-				submitEntryPrompt.SetActive(true);
-				currentState = LeaderboardStates.entry;
-				PlayerScore_Text.text = GameManager.instance.score.ToString(); 
-                break;
-
             case LeaderboardStates.local:
 				currentState = LeaderboardStates.local;
 				headerTitle.text = "Local Leaderboard";
 				_localLeaderboard = GetLocalLeaderboardData();
 				_leaderboard = _localLeaderboard;
 				SetLeaderboardData(_leaderboard.Keys.ToList(), _leaderboard.Values.ToList());
-
-
 				break;
 
             case LeaderboardStates.online:
@@ -286,41 +285,30 @@ public class Leaderboard : MonoBehaviour
         }
     }
 
-	private void ExitState(LeaderboardStates _state)
-	{
-		switch (_state)
-		{
-			case LeaderboardStates.entry:
-				submitEntryPrompt.SetActive(false);
-				break;
-			case LeaderboardStates.local:
-				break;
-			case LeaderboardStates.online:
-				break;
-			default:
-				break;
-		}
-	}
+	
 
-	[ContextMenu("Open Local Leaderboard")]
-	private void OpenLocalLeaderboard()
+
+    [ContextMenu("Go to Local Leaderboard")]
+	private void GoToLocalLeaderboard()
 	{
 		EnterState(LeaderboardStates.local);
 	}
-	[ContextMenu("Open Online Leaderboard")]
-	private void OpenOnlineLeaderboard()
+	[ContextMenu("Go to Online Leaderboard")]	
+	private void GoToOnlineLeaderboard()
 	{
 		EnterState(LeaderboardStates.online);
 	}
 	[ContextMenu("Open PlayerName Prompt")]
-	private void EnablePlayerNameEntryPrompt()
+	private void OpenPlayerNameEntryPrompt()
 	{
-		EnterState(LeaderboardStates.entry);
+		submitEntryPrompt.SetActive(true);
+		PlayerScore_Text.text = GameManager.instance.score.ToString();
 	}
-	private void HidePlayerNameEntryPrompt()
+	private void ClosePlayerNameEntryPrompt()
 	{
-		ExitState(LeaderboardStates.entry);
+		submitEntryPrompt.SetActive(false);
 	}
+
 
 	private bool CheckOnlineConnection()
     {
@@ -335,8 +323,6 @@ public class Leaderboard : MonoBehaviour
 		return SaveSystem.instance.GetLocalLeaderboard();
 	}
 
-
-	// triggered by UI button
 	public void SendLeaderboardDataToDreamLo()
 	{
 		for (int i = 0; i < GetLeaderboardList().Count; i++)
