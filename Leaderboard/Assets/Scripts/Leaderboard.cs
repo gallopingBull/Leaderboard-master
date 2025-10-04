@@ -5,6 +5,12 @@ using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 
+namespace galloping_bull.online.utlities
+{
+
+
+}
+
 [Serializable]
 public class Leaderboard : MonoBehaviour
 {
@@ -248,12 +254,14 @@ public class Leaderboard : MonoBehaviour
 			playerScore_entries_UI.Add(tmpEntry); // this list will be read in by UI and displayed on screenS
 		}
 	}
+	
 	private void DestroyLeaderboard()
 	{
 		foreach (GameObject item in playerScore_entries_UI)
 			Destroy(item.gameObject);
 		playerScore_entries_UI.Clear();
 	}
+	
 	public void ResetLeaderboard()
     {
 		DestroyLeaderboard();
@@ -285,30 +293,29 @@ public class Leaderboard : MonoBehaviour
         }
     }
 
-	
-
-
     [ContextMenu("Go to Local Leaderboard")]
 	private void GoToLocalLeaderboard()
 	{
 		EnterState(LeaderboardStates.local);
 	}
+	
 	[ContextMenu("Go to Online Leaderboard")]	
 	private void GoToOnlineLeaderboard()
 	{
 		EnterState(LeaderboardStates.online);
 	}
+	
 	[ContextMenu("Open PlayerName Prompt")]
 	private void OpenPlayerNameEntryPrompt()
 	{
 		submitEntryPrompt.SetActive(true);
 		PlayerScore_Text.text = Leaderboard_GameManager.instance.score.ToString();
 	}
+	
 	private void ClosePlayerNameEntryPrompt()
 	{
 		submitEntryPrompt.SetActive(false);
 	}
-
 
 	private bool CheckOnlineConnection()
     {
@@ -345,7 +352,6 @@ public class Leaderboard : MonoBehaviour
 
 		return tmpDic;
 	}
-
 
 	#region sorting functions
 	// sort leaderboard by highest to lowest score
